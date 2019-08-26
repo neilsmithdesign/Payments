@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Payments {
+public extension Payments {
     
     struct Configuration {
         
@@ -15,13 +15,13 @@ extension Payments {
         let productIdentifiers: Set<String>
         let simulatesAskToBuyInSandbox: Bool
         
-        init(mode: Mode, productIdentifiers: Set<String>, simulatesAskToBuyInSandbox: Bool = false) {
+        public init(mode: Mode, productIdentifiers: Set<String>, simulatesAskToBuyInSandbox: Bool = false) {
             self.mode = mode
             self.productIdentifiers = productIdentifiers
             self.simulatesAskToBuyInSandbox = simulatesAskToBuyInSandbox
         }
         
-        enum Mode {
+        public enum Mode {
             case sandbox
             case production
         }

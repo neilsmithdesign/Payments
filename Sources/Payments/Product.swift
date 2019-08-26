@@ -7,19 +7,19 @@
 
 import StoreKit
 
-struct Product {
+public struct Product {
     
-    let title: String
-    let description: String
-    let price: String
-    let identifier: String
-    let storeKitProduct: SKProduct
+    public let title: String
+    public let description: String
+    public let price: String
+    public let identifier: String
+    public let storeKitProduct: SKProduct
     
     var storeKitPayment: SKMutablePayment {
         return SKMutablePayment(product: storeKitProduct)
     }
     
-    init(storeKit product: SKProduct) {
+    public init(storeKit product: SKProduct) {
         self.title = product.localizedTitle
         self.description = product.localizedDescription
         let formatter = NumberFormatter()
@@ -35,7 +35,7 @@ struct Product {
 
 extension Product: Hashable {
     
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         hasher.combine(identifier)
     }
     

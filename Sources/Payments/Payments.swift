@@ -11,13 +11,13 @@ import StoreKit
 
 /// Handles all Store Kit related transactions. If not using a separate SKPaymentTransactionObserver,
 /// this class must be initiliazed at app launch and held in memory for the duration of the app life cycle.
-final class Payments: NSObject, PaymentsProcessing {
+public final class Payments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    weak var observer: PaymentsObserving?
+    public weak var observer: PaymentsObserving?
     
-    init(configuration: Payments.Configuration, transactionObserver: SKPaymentTransactionObserver? = nil) {
+    public init(configuration: Payments.Configuration, transactionObserver: SKPaymentTransactionObserver? = nil) {
         self.configuration = configuration
         super.init()
         if let observer = transactionObserver {
@@ -27,7 +27,7 @@ final class Payments: NSObject, PaymentsProcessing {
         }
     }
     
-    private (set) var availableProducts: Set<Product> = []
+    public private (set) var availableProducts: Set<Product> = []
 
     
     // MARK: Private
@@ -53,11 +53,11 @@ final class Payments: NSObject, PaymentsProcessing {
 // MARK: - Product Request
 extension Payments: SKProductsRequestDelegate {
     
-    func loadProducts() {
+    public func loadProducts() {
         productsRequest.start()
     }
     
-    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+    public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         availableProducts = Set(response.products.map { Product(storeKit: $0) })
         DispatchQueue.main.async {
             self.observer?.payments(self, didLoad: self.availableProducts)
@@ -71,7 +71,7 @@ extension Payments: SKProductsRequestDelegate {
 extension Payments {
 
     
-    func makeInAppPurchase(for product: Product) {
+    public func makeInAppPurchase(for product: Product) {
         guard Payments.canMakePayments else {
             DispatchQueue.main.async { self.observer?.userCannotMake(payments: self) }
             return
@@ -81,7 +81,7 @@ extension Payments {
         SKPaymentQueue.default().add(payment)
     }
     
-    func restoreInAppPurchases() {
+    public func restoreInAppPurchases() {
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
     
@@ -91,11 +91,11 @@ extension Payments {
 // MARK: - Transaction Observer
 extension Payments: SKPaymentTransactionObserver {
     
-    func remove(_ transactionObserver: SKPaymentTransactionObserver) {
+    public func remove(_ transactionObserver: SKPaymentTransactionObserver) {
         SKPaymentQueue.default().remove(transactionObserver)
     }
 
-    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+    public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
             switch transaction.transactionState {
             case .purchasing: break
@@ -108,7 +108,7 @@ extension Payments: SKPaymentTransactionObserver {
         }
     }
     
-    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
+    public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         handle(transaction: error)
     }
 
@@ -142,7 +142,7 @@ extension Payments: SKPaymentTransactionObserver {
 
 
 // MARK: - Alerts
-extension Payments {
+public extension Payments {
     
     struct Alert {
         let title: String?

@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PaymentsProcessing {
+public protocol PaymentsProcessing {
     var observer: PaymentsObserving? { get }
     var availableProducts: Set<Product> { get }
     func loadProducts()

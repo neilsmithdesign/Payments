@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PaymentsObserving: AnyObject {
+public protocol PaymentsObserving: AnyObject {
     func payments(_ payments: Payments, didLoad products: Set<Product>)
     func payments(_ payments: Payments, didFailWithError message: String?)
     func payments(_ payments: Payments, paymentWasDeferred alert: Payments.Alert)
