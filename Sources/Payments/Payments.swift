@@ -15,8 +15,6 @@ public final class Payments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    public weak var observer: PaymentsObserving?
-    
     public init(configuration: Payments.Configuration, transactionObserver: SKPaymentTransactionObserver? = nil) {
         self.configuration = configuration
         super.init()
@@ -27,7 +25,22 @@ public final class Payments: NSObject, PaymentsProcessing {
         }
     }
     
+    public func add(observer: PaymentsObserving) {
+        let observation = Observation(observer: observer)
+        self.observations[ObjectIdentifier(observer)] = observation
+    }
+    
+    public func remove(observer: PaymentsObserving) {
+        self.observations.removeValue(forKey: ObjectIdentifier(observer))
+    }
+    
+    
+    // MARK: Read only
     public private (set) var availableProducts: Set<Product> = []
+
+    public static var canMakePayments: Bool {
+        return SKPaymentQueue.canMakePayments()
+    }
 
     
     // MARK: Private
@@ -43,9 +56,9 @@ public final class Payments: NSObject, PaymentsProcessing {
         return pr
     }()
     
-    static var canMakePayments: Bool {
-        return SKPaymentQueue.canMakePayments()
-    }
+    
+    // MARK: Observations
+    private var observations: [ObjectIdentifier : Observation] = [:]
     
 }
 
@@ -59,9 +72,7 @@ extension Payments: SKProductsRequestDelegate {
     
     public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         availableProducts = Set(response.products.map { Product(storeKit: $0) })
-        DispatchQueue.main.async {
-            self.observer?.payments(self, didLoad: self.availableProducts)
-        }
+        didLoad(availableProducts)
     }
     
 }
@@ -73,7 +84,7 @@ extension Payments {
     
     public func makeInAppPurchase(for product: Product) {
         guard Payments.canMakePayments else {
-            DispatchQueue.main.async { self.observer?.userCannotMake(payments: self) }
+            cannotMakePayments()
             return
         }
         let payment = product.storeKitPayment
@@ -98,11 +109,24 @@ extension Payments: SKPaymentTransactionObserver {
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
             switch transaction.transactionState {
-            case .purchasing: break
-            case .deferred: handle(deferred: transaction)
-            case .purchased: handle(purchased: transaction)
-            case .failed: handle(failed: transaction)
-            case .restored: handle(restored: transaction)
+            case .purchasing:
+                break
+                
+            case .deferred:
+                paymentWasDeferred(for: transaction)
+                
+            case .purchased:
+                SKPaymentQueue.default().finishTransaction(transaction)
+                didCompletePurchase(for: transaction)
+                
+            case .failed:
+                SKPaymentQueue.default().finishTransaction(transaction)
+                handle(transaction: transaction.error)
+                
+            case .restored:
+                SKPaymentQueue.default().finishTransaction(transaction)
+                didRestorePurchases(for: transaction)
+                
             @unknown default: fatalError()
             }
         }
@@ -111,33 +135,70 @@ extension Payments: SKPaymentTransactionObserver {
     public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         handle(transaction: error)
     }
-
-    
-    // MARK: Helpers
-    private func handle(purchased transaction: SKPaymentTransaction) {
-        SKPaymentQueue.default().finishTransaction(transaction)
-        DispatchQueue.main.async { self.observer?.didCompletePurchase(self) }
-    }
-
-    private func handle(restored transaction: SKPaymentTransaction) {
-        SKPaymentQueue.default().finishTransaction(transaction)
-        DispatchQueue.main.async { self.observer?.didRestorePurchases(self) }
-    }
-    
-    private func handle(failed transaction: SKPaymentTransaction) {
-        SKPaymentQueue.default().finishTransaction(transaction)
-        handle(transaction: transaction.error)
-    }
-    
-    private func handle(deferred transaction: SKPaymentTransaction) {
-        DispatchQueue.main.async { self.observer?.payments(self, paymentWasDeferred: .deferredAlert) }
-    }
     
     private func handle(transaction error: Error?) {
-        if let err = error as? SKError, err.code != .paymentCancelled {
-            DispatchQueue.main.async { self.observer?.payments(self, didFailWithError: err.localizedDescription) }
+        guard let error = error as? SKError, error.code != .paymentCancelled else { return }
+        paymentFailed(with: error)
+    }
+    
+}
+
+
+// MARK: - Observers
+extension Payments {
+    
+    struct Observation {
+        weak var observer: PaymentsObserving?
+    }
+    
+    private var observers: [PaymentsObserving] {
+        var observers: [PaymentsObserving] = []
+        for (id, observation) in observations {
+            guard let observer = observation.observer else {
+                observations.removeValue(forKey: id)
+                continue
+            }
+            observers.append(observer)
+        }
+        return observers
+    }
+    
+    private func notifyObservers(_ event: @escaping (PaymentsObserving) -> Void) {
+        DispatchQueue.main.async {
+            self.observers.forEach { event($0) }
         }
     }
+    
+    private func didLoad(_ products: Set<Product>) {
+        notifyObservers { $0.payments(self, didLoad: products) }
+        Notification.LoadedProducts.notify(with: products)
+    }
+    
+    private func cannotMakePayments() {
+        notifyObservers { $0.userCannotMake(payments: self) }
+        Notification.CannotMakePayments.notify()
+    }
+    
+    private func didCompletePurchase(for transaction: SKPaymentTransaction) {
+        notifyObservers { $0.didCompletePurchase(self) }
+        Notification.Payment.Complete.notify(for: transaction.payment.productIdentifier)
+    }
+    
+    private func didRestorePurchases(for transaction: SKPaymentTransaction) {
+        notifyObservers { $0.didRestorePurchases(self) }
+        Notification.Payment.Restored.notify(for: transaction.payment.productIdentifier)
+    }
+    
+    private func paymentWasDeferred(for transaction: SKPaymentTransaction) {
+        notifyObservers { $0.payments(self, paymentWasDeferred: .deferredAlert) }
+        Notification.Payment.Deferred.notify()
+    }
+    
+    private func paymentFailed(with error: SKError) {
+        notifyObservers { $0.payments(self, didFailWithError: error.localizedDescription) }
+        Notification.Payment.Failed.notify(for: error)
+    }
+    
 }
 
 
