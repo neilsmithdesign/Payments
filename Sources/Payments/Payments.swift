@@ -206,8 +206,8 @@ extension Payments {
 public extension Payments {
     
     struct Alert {
-        let title: String?
-        let message: String?
+        public let title: String?
+        public let message: String?
     }
     
 }
