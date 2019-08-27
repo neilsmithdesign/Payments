@@ -121,13 +121,16 @@ public extension Payments.Notification {
         public struct Deferred {
             
             public let alert: Payments.Alert
+            public let productIdentifier: String
             
             public init?(_ notification: Notification) {
                 guard
                     let title = notification.userInfo?[Deferred.titleKey] as? String,
-                    let message = notification.userInfo?[Deferred.messageKey] as? String
+                    let message = notification.userInfo?[Deferred.messageKey] as? String,
+                    let id = notification.userInfo?[Deferred.identifierKey] as? String
                 else { return nil }
                 self.alert = .init(title: title, message: message)
+                self.productIdentifier = id
             }
             
             public static var notification: Notification.Name {
@@ -140,14 +143,18 @@ public extension Payments.Notification {
             static var messageKey: String {
                 return notification.rawValue + ".user.info.key.message"
             }
+            static var identifierKey: String {
+                return notification.rawValue + ".user.info.key.identifier"
+            }
             
-            static func notify() {
+            static func notify(for productIdentifier: String) {
                 NotificationCenter.default.post(
                     name: notification,
                     object: nil,
                     userInfo: [
                         Deferred.titleKey : Payments.Alert.deferredAlert.title!,
-                        Deferred.messageKey : Payments.Alert.deferredAlert.message!
+                        Deferred.messageKey : Payments.Alert.deferredAlert.message!,
+                        Deferred.identifierKey : productIdentifier
                     ]
                 )
             }
@@ -159,6 +166,7 @@ public extension Payments.Notification {
         public struct Failed {
             
             public let error: SKError
+            
             
             public init?(_ notification: Notification) {
                 guard let error = notification.userInfo?[Failed.key] as? SKError else { return nil }

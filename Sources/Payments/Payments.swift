@@ -191,7 +191,7 @@ extension Payments {
     
     private func paymentWasDeferred(for transaction: SKPaymentTransaction) {
         notifyObservers { $0.payments(self, paymentWasDeferred: .deferredAlert) }
-        Notification.Payment.Deferred.notify()
+        Notification.Payment.Deferred.notify(for: transaction.payment.productIdentifier)
     }
     
     private func paymentFailed(with error: SKError) {
