@@ -75,6 +75,10 @@ extension Payments: SKProductsRequestDelegate {
         didLoad(availableProducts)
     }
     
+    public func request(_ request: SKRequest, didFailWithError error: Error) {
+        print("SKRequest failed with error: \(error.localizedDescription)")
+    }
+    
 }
 
 
