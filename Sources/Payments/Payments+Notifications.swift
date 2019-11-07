@@ -31,7 +31,7 @@ public extension Payments.Notification {
         public static var notification: Notification.Name {
             return .init("com.NeilSmithDesignLTD.payments.did.load.products")
         }
-        static var key: String {
+        public static var key: String {
             return notification.rawValue + ".user.info.key"
         }
         static func notify(with products: Set<Product>) {
@@ -75,7 +75,7 @@ public extension Payments.Notification {
                 return .init("com.NeilSmithDesignLTD.payments.payment.complete")
             }
             
-            static var key: String {
+            public static var key: String {
                 return notification.rawValue + ".user.info.key"
             }
             
@@ -103,7 +103,7 @@ public extension Payments.Notification {
                 return .init("com.NeilSmithDesignLTD.payments.payment.restored")
             }
             
-            static var key: String {
+            public static var key: String {
                 return notification.rawValue + ".user.info.key"
             }
             
@@ -137,13 +137,13 @@ public extension Payments.Notification {
                 return .init("com.NeilSmithDesignLTD.payments.payment.deferred")
             }
             
-            static var titleKey: String {
+            public static var titleKey: String {
                 return notification.rawValue + ".user.info.key.title"
             }
-            static var messageKey: String {
+            public static var messageKey: String {
                 return notification.rawValue + ".user.info.key.message"
             }
-            static var identifierKey: String {
+            public static var identifierKey: String {
                 return notification.rawValue + ".user.info.key.identifier"
             }
             
@@ -177,7 +177,7 @@ public extension Payments.Notification {
                 return .init("com.NeilSmithDesignLTD.payments.payment.failed")
             }
             
-            static var key: String {
+            public static var key: String {
                 return notification.rawValue + ".user.info.key"
             }
             
