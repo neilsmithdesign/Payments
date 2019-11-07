@@ -33,6 +33,24 @@ public struct Product {
     }
 }
 
+public extension Product {
+    
+    static func createMock(title: String, description: String, price: Decimal, identifier: String) -> Product {
+        return .init(title: title, description: description, price: price, identifier: identifier)
+    }
+    
+    private init(title: String, description: String, price: Decimal, identifier: String) {
+        self.title = title
+        self.description = description
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        self.price = formatter.string(from: NSDecimalNumber(decimal: price)) ?? ""
+        self.identifier = identifier
+        self.storeKitProduct = SKProduct()
+    }
+    
+}
+
 extension Product: Hashable {
     
     public func hash(into hasher: inout Hasher) {
