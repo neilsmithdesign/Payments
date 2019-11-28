@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PaymentsNotification.swift
 //  
 //
 //  Created by Neil Smith on 27/08/2019.
@@ -8,186 +8,153 @@
 import Foundation
 import StoreKit
 
-public extension Payments {
+public enum PaymentsNotification {
     
-    enum Notification {}
+    case loadProductsSucceeded
+    case loadProductsFailed
+    case cannotMakePayments
+    case paymentCompletedSuccessfully
+    case paymentRestoredSuccessfully
+    case paymentDeferred
+    
+    public var name: Notification.Name {
+        return .init(root)
+    }
+    
+    public var userInfoKey: String {
+        return root + ".user.info.key"
+    }
+    
+    private var root: String {
+        var name = "com.NeilSmithDesignLTD.payments"
+        switch self {
+        case .loadProductsSucceeded: name += ".load.products.succeeded"
+        case .loadProductsFailed: name += ".load.products.failed"
+        case .cannotMakePayments: name += ".cannot.make.payments"
+        case .paymentCompletedSuccessfully: name += ".payment.completed.successfully"
+        case .paymentRestoredSuccessfully: name += ".payment.restored.successfully"
+        case .paymentDeferred: name += "payment.deferred"
+        }
+        return name
+    }
     
 }
 
 
-public extension Payments.Notification {
+
+public protocol PaymentsNotifying {
+    associatedtype Content
+    var content: Content { get set }
+    static var ntf: PaymentsNotification { get }
+    init()
+}
+
+public extension PaymentsNotifying {
+    
+    init?(_ notification: Notification) {
+        guard let content = notification.userInfo?[Self.key] as? Content else { return nil }
+        self.init()
+        self.content = content
+    }
+}
+
+extension PaymentsNotifying {
+    static var notification: Notification.Name { ntf.name }
+    static var key: String { ntf.userInfoKey }
+}
+extension PaymentsNotifying {
+    static func notify(with content: Content) {
+        NotificationCenter.default.post(
+            name: Self.notification,
+            object: nil,
+            userInfo: [Self.key : content]
+        )
+    }
+}
+
+
+public extension PaymentsNotification {
     
     
     // MARK: - Loaded
-    struct LoadedProducts {
+    enum LoadedProducts {
         
-        public let products: Set<Product>
+        public struct Succeeded: PaymentsNotifying {
+            public typealias Content = Set<Product>
+            public var content: Set<Product>
+            public static var ntf: PaymentsNotification { .loadProductsSucceeded }
+            public init() {
+                self.content = []
+            }
+        }
         
-        public init?(_ notification: Notification) {
-            guard let products = notification.userInfo?[LoadedProducts.key] as? Set<Product> else { return nil }
-            self.products = products
-        }
-
-        public static var notification: Notification.Name {
-            return .init("com.NeilSmithDesignLTD.payments.did.load.products")
-        }
-        public static var key: String {
-            return notification.rawValue + ".user.info.key"
-        }
-        static func notify(with products: Set<Product>) {
-            NotificationCenter.default.post(
-                name: Payments.Notification.LoadedProducts.notification,
-                object: nil,
-                userInfo: [LoadedProducts.key : products]
-            )
+        public struct Failed: PaymentsNotifying {
+            public typealias Content = PaymentsError
+            public var content: PaymentsError
+            public static var ntf: PaymentsNotification { .loadProductsSucceeded }
+            public init() {
+                self.content = .productLoadRequestFailed(message: "")
+            }
         }
         
     }
     
     
     // MARK: - Cannot make
-    enum CannotMakePayments {
-        
-        public static var notification: Notification.Name {
-            return .init("com.NeilSmithDesignLTD.payments.cannot.make.payments")
+    struct CannotMakePayments: PaymentsNotifying {
+        public typealias Content = Any?
+        public var content: Any?
+        public static var ntf: PaymentsNotification { .loadProductsSucceeded }
+        public init() {
+            self.content = nil
         }
-        
-        static func notify() {
-            NotificationCenter.default.post(name: notification, object: nil)
-        }
-        
     }
     
     enum Payment {
         
         
         // MARK: - Complete
-        public struct Complete {
-            
-            public let productIdentifier: String
-            
-            public init?(_ notification: Notification) {
-                guard let id = notification.userInfo?[Complete.key] as? String else { return nil }
-                self.productIdentifier = id
-            }
-            
-            public static var notification: Notification.Name {
-                return .init("com.NeilSmithDesignLTD.payments.payment.complete")
-            }
-            
-            public static var key: String {
-                return notification.rawValue + ".user.info.key"
-            }
-            
-            static func notify(for productIdentifier: String) {
-                NotificationCenter.default.post(
-                    name: notification,
-                    object: nil,
-                    userInfo: [Complete.key : productIdentifier]
-                )
+        public struct Complete: PaymentsNotifying {
+            public typealias Content = ProductIdentifier
+            public var content: ProductIdentifier
+            public static var ntf: PaymentsNotification { .paymentCompletedSuccessfully }
+            public init() {
+                self.content = ""
             }
         }
         
         
         // MARK: - Restored
-        public struct Restored {
-            
-            public let productIdentifier: String
-            
-            public init?(_ notification: Notification) {
-                guard let id = notification.userInfo?[Restored.key] as? String else { return nil }
-                self.productIdentifier = id
-            }
-            
-            public static var notification: Notification.Name {
-                return .init("com.NeilSmithDesignLTD.payments.payment.restored")
-            }
-            
-            public static var key: String {
-                return notification.rawValue + ".user.info.key"
-            }
-            
-            static func notify(for productIdentifier: String) {
-                NotificationCenter.default.post(
-                    name: notification,
-                    object: nil,
-                    userInfo: [Restored.key : productIdentifier]
-                )
+        public struct Restored: PaymentsNotifying {
+            public typealias Content = ProductIdentifier
+            public var content: ProductIdentifier
+            public static var ntf: PaymentsNotification { .paymentRestoredSuccessfully }
+            public init() {
+                self.content = ""
             }
         }
     
     
         // MARK: - Deferred
-        public struct Deferred {
-            
-            public let alert: Payments.Alert
-            public let productIdentifier: String
-            
-            public init?(_ notification: Notification) {
-                guard
-                    let title = notification.userInfo?[Deferred.titleKey] as? String,
-                    let message = notification.userInfo?[Deferred.messageKey] as? String,
-                    let id = notification.userInfo?[Deferred.identifierKey] as? String
-                else { return nil }
-                self.alert = .init(title: title, message: message)
-                self.productIdentifier = id
+        public struct Deferred: PaymentsNotifying {
+            public typealias Content = Payments.DeferredAlert
+            public var content: Payments.DeferredAlert
+            public static var ntf: PaymentsNotification { .paymentDeferred }
+            public init() {
+                self.content = .standardMessage(for: "")
             }
-            
-            public static var notification: Notification.Name {
-                return .init("com.NeilSmithDesignLTD.payments.payment.deferred")
-            }
-            
-            public static var titleKey: String {
-                return notification.rawValue + ".user.info.key.title"
-            }
-            public static var messageKey: String {
-                return notification.rawValue + ".user.info.key.message"
-            }
-            public static var identifierKey: String {
-                return notification.rawValue + ".user.info.key.identifier"
-            }
-            
-            static func notify(for productIdentifier: String) {
-                NotificationCenter.default.post(
-                    name: notification,
-                    object: nil,
-                    userInfo: [
-                        Deferred.titleKey : Payments.Alert.deferredAlert.title!,
-                        Deferred.messageKey : Payments.Alert.deferredAlert.message!,
-                        Deferred.identifierKey : productIdentifier
-                    ]
-                )
-            }
-            
         }
         
         
         // MARK: - Failed
-        public struct Failed {
-            
-            public let error: SKError
-            
-            
-            public init?(_ notification: Notification) {
-                guard let error = notification.userInfo?[Failed.key] as? SKError else { return nil }
-                self.error = error
+        public struct Failed: PaymentsNotifying {
+            public typealias Content = SKError
+            public var content: SKError
+            public static var ntf: PaymentsNotification { .paymentDeferred }
+            public init() {
+                self.content = .init(_nsError: NSError())
             }
             
-            public static var notification: Notification.Name {
-                return .init("com.NeilSmithDesignLTD.payments.payment.failed")
-            }
-            
-            public static var key: String {
-                return notification.rawValue + ".user.info.key"
-            }
-            
-            static func notify(for error: SKError) {
-                NotificationCenter.default.post(
-                    name: notification,
-                    object: nil,
-                    userInfo: [Failed.key : error]
-                )
-            }
             
         }
         

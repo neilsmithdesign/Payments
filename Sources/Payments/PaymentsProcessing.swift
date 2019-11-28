@@ -7,10 +7,9 @@
 
 import Foundation
 
-/// Interface to Payments.swift. Permits testing with a fake object
+/// Interface to Payments.swift. Permits intergation testing with a fake object
 public protocol PaymentsProcessing {
-    func add(observer: PaymentsObserving)
-    func remove(observer: PaymentsObserving)
+    var observer: PaymentsObserving? { get set }
     var availableProducts: Set<Product> { get }
     func loadProducts()
     func makeInAppPurchase(for product: Product)

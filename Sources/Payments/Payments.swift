@@ -15,25 +15,18 @@ public final class Payments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    public init(configuration: Payments.Configuration, transactionObserver: SKPaymentTransactionObserver? = nil) {
+    public init(configuration: Payments.Configuration) {
         self.configuration = configuration
         super.init()
-        if let observer = transactionObserver {
+        if let observer = configuration.transactionObserver {
             SKPaymentQueue.default().add(observer)
         } else {
             SKPaymentQueue.default().add(self)
         }
     }
     
-    public func add(observer: PaymentsObserving) {
-        let observation = Observation(observer: observer)
-        self.observations[ObjectIdentifier(observer)] = observation
-    }
-    
-    public func remove(observer: PaymentsObserving) {
-        self.observations.removeValue(forKey: ObjectIdentifier(observer))
-    }
-    
+    public weak var observer: PaymentsObserving?
+
     
     // MARK: Read only
     public private (set) var availableProducts: Set<Product> = []
@@ -56,10 +49,6 @@ public final class Payments: NSObject, PaymentsProcessing {
         return pr
     }()
     
-    
-    // MARK: Observations
-    private var observations: [ObjectIdentifier : Observation] = [:]
-    
 }
 
 
@@ -76,9 +65,15 @@ extension Payments: SKProductsRequestDelegate {
     }
     
     public func request(_ request: SKRequest, didFailWithError error: Error) {
+        
         print("SKRequest failed with error: \(error.localizedDescription)")
     }
     
+}
+
+
+public enum PaymentsError: Error {
+    case productLoadRequestFailed(message: String)
 }
 
 
@@ -92,7 +87,7 @@ extension Payments {
             return
         }
         let payment = product.storeKitPayment
-        payment.simulatesAskToBuyInSandbox = configuration.simulatesAskToBuyInSandbox
+        payment.simulatesAskToBuyInSandbox = configuration.simulateAskToBuy
         SKPaymentQueue.default().add(payment)
     }
     
@@ -148,59 +143,44 @@ extension Payments: SKPaymentTransactionObserver {
 }
 
 
-// MARK: - Observers
+// MARK: - Observer calls
 extension Payments {
     
-    struct Observation {
-        weak var observer: PaymentsObserving?
-    }
-    
-    private var observers: [PaymentsObserving] {
-        var observers: [PaymentsObserving] = []
-        for (id, observation) in observations {
-            guard let observer = observation.observer else {
-                observations.removeValue(forKey: id)
-                continue
-            }
-            observers.append(observer)
-        }
-        return observers
-    }
-    
-    private func notifyObservers(_ event: @escaping (PaymentsObserving) -> Void) {
-        DispatchQueue.main.async {
-            self.observers.forEach { event($0) }
-        }
-    }
-    
     private func didLoad(_ products: Set<Product>) {
-        notifyObservers { $0.payments(self, didLoad: products) }
-        Notification.LoadedProducts.notify(with: products)
+        observer?.payments(self, didLoad: products)
+        PaymentsNotification.LoadedProducts.Succeeded.notify(with: products)
+    }
+    
+    private func failedToLoadProducts(with error: Error) {
+        let productLoadError = PaymentsError.productLoadRequestFailed(message: error.localizedDescription)
+        observer?.payments(self, didFailToLoadProductsWith: productLoadError)
+        PaymentsNotification.LoadedProducts.Failed.notify(with: productLoadError)
     }
     
     private func cannotMakePayments() {
-        notifyObservers { $0.userCannotMake(payments: self) }
-        Notification.CannotMakePayments.notify()
+        observer?.userCannotMake(payments: self)
+        PaymentsNotification.CannotMakePayments.notify(with: nil)
     }
     
     private func didCompletePurchase(for transaction: SKPaymentTransaction) {
-        notifyObservers { $0.didCompletePurchase(self) }
-        Notification.Payment.Complete.notify(for: transaction.payment.productIdentifier)
+        observer?.didCompletePurchase(self)
+        PaymentsNotification.Payment.Complete.notify(with: transaction.payment.productIdentifier)
     }
     
     private func didRestorePurchases(for transaction: SKPaymentTransaction) {
-        notifyObservers { $0.didRestorePurchases(self) }
-        Notification.Payment.Restored.notify(for: transaction.payment.productIdentifier)
+        observer?.didRestorePurchases(self)
+        PaymentsNotification.Payment.Restored.notify(with: transaction.payment.productIdentifier)
     }
     
     private func paymentWasDeferred(for transaction: SKPaymentTransaction) {
-        notifyObservers { $0.payments(self, paymentWasDeferred: .deferredAlert) }
-        Notification.Payment.Deferred.notify(for: transaction.payment.productIdentifier)
+        observer?.payments(self, paymentWasDeferred: .deferredAlert)
+        let alert = DeferredAlert.standardMessage(for: transaction.payment.productIdentifier)
+        PaymentsNotification.Payment.Deferred.notify(with: alert)
     }
     
     private func paymentFailed(with error: SKError) {
-        notifyObservers { $0.payments(self, didFailWithError: error.localizedDescription) }
-        Notification.Payment.Failed.notify(for: error)
+        observer?.payments(self, didFailWithError: error.localizedDescription)
+        PaymentsNotification.Payment.Failed.notify(with: error)
     }
     
 }
@@ -223,6 +203,25 @@ extension Payments.Alert {
             title: "Waiting For Approval",
             message: "Thank you! You can continue to use the app whilst your purchase is pending approval from your family organizer."
         )
+    }
+    
+}
+
+public extension Payments {
+    
+    struct DeferredAlert {
+        public let title: String
+        public let message: String
+        public let productIdentifier: String
+        
+        static func standardMessage(for productIdentifier: String) -> DeferredAlert {
+            return .init(
+                title: "Waiting For Approval",
+                message: "Thank you! You can continue to use the app whilst your purchase is pending approval from your family organizer.",
+                productIdentifier: productIdentifier
+            )
+        }
+        
     }
     
 }

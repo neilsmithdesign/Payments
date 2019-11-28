@@ -9,6 +9,7 @@ import Foundation
 
 public protocol PaymentsObserving: AnyObject {
     func payments(_ payments: Payments, didLoad products: Set<Product>)
+    func payments(_ payments: Payments, didFailToLoadProductsWith error: PaymentsError)
     func payments(_ payments: Payments, didFailWithError message: String?)
     func payments(_ payments: Payments, paymentWasDeferred alert: Payments.Alert)
     func didRestorePurchases(_ payments: Payments)
