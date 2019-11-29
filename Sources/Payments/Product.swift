@@ -12,6 +12,7 @@ public struct Product {
     public let title: String
     public let description: String
     public let price: String
+    public let numericalPrice: NSDecimalNumber
     public let identifier: String
     public let storeKitProduct: SKProduct
     
@@ -27,6 +28,7 @@ public struct Product {
         if formatter.locale != product.priceLocale {
             formatter.locale = product.priceLocale
         }
+        self.numericalPrice = product.price
         self.price = formatter.string(from: product.price) ?? "\(product.price)"
         self.identifier = product.productIdentifier
         self.storeKitProduct = product
@@ -44,7 +46,9 @@ public extension Product {
         self.description = description
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
-        self.price = formatter.string(from: NSDecimalNumber(decimal: price)) ?? ""
+        let numericalPrice = NSDecimalNumber(decimal: price)
+        self.numericalPrice = numericalPrice
+        self.price = formatter.string(from: numericalPrice) ?? ""
         self.identifier = identifier
         self.storeKitProduct = SKProduct()
     }
