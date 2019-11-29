@@ -99,7 +99,7 @@ extension Payments {
     private func didLoad(_ products: Set<Product>) {
         onMainThread {
             self.observer?.payments(self, didLoad: products)
-            PaymentsEvent.LoadProducts.Succeeded.notify(with: products)
+            PaymentEvent.LoadProducts.Succeeded.notify(with: products)
         }
     }
     
@@ -107,28 +107,28 @@ extension Payments {
         let productLoadError = PaymentsError.productLoadRequestFailed(message: error.localizedDescription)
         onMainThread {
             self.observer?.payments(self, didFailWith: productLoadError)
-            PaymentsEvent.LoadProducts.Failed.notify(with: productLoadError)
+            PaymentEvent.LoadProducts.Failed.notify(with: productLoadError)
         }
     }
     
     private func cannotMakePayments() {
         onMainThread {
             self.observer?.userCannotMake(payments: self)
-            PaymentsEvent.CannotMakePayments.notify(with: nil)
+            PaymentEvent.CannotMakePayments.notify(with: nil)
         }
     }
     
     private func didCompletePurchase(for productIdentifier: ProductIdentifier) {
         onMainThread {
             self.observer?.didCompletePurchase(self)
-            PaymentsEvent.Payment.Complete.notify(with: productIdentifier)
+            PaymentEvent.Payment.Complete.notify(with: productIdentifier)
         }
     }
     
     private func didRestorePurchases(for productIdentifier: ProductIdentifier) {
         onMainThread {
             self.observer?.didRestorePurchases(self)
-            PaymentsEvent.Payment.Restored.notify(with: productIdentifier)
+            PaymentEvent.Payment.Restored.notify(with: productIdentifier)
         }
     }
     
@@ -136,14 +136,14 @@ extension Payments {
         let alert = DeferredAlert.standardMessage(for: productIdentifier)
         onMainThread {
             self.observer?.payments(self, paymentWasDeferred: alert)
-            PaymentsEvent.Payment.Deferred.notify(with: alert)
+            PaymentEvent.Payment.Deferred.notify(with: alert)
         }
     }
     
     private func paymentFailed(with error: PaymentsError) {
         onMainThread {
             self.observer?.payments(self, didFailWith: error)
-            PaymentsEvent.Payment.Failed.notify(with: error)
+            PaymentEvent.Payment.Failed.notify(with: error)
         }
     }
     

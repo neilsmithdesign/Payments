@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum PaymentsEventKind {
+public enum PaymentEventKind {
     
     case loadProductsSucceeded
     case loadProductsFailed

@@ -1,5 +1,5 @@
 //
-//  PaymentsEvent.swift
+//  PaymentEvent.swift
 //  
 //
 //  Created by Neil Smith on 27/08/2019.
@@ -8,7 +8,7 @@
 import Foundation
 import StoreKit
 
-public enum PaymentsEvent {
+public enum PaymentEvent {
     
     // MARK: - Load products
     enum LoadProducts {
@@ -17,7 +17,7 @@ public enum PaymentsEvent {
             
             public typealias Content = Set<Product>
             public var content: Set<Product>
-            public static var kind: PaymentsEventKind { .loadProductsSucceeded }
+            public static var kind: PaymentEventKind { .loadProductsSucceeded }
             public init(_ content: Set<Product>) {
                 self.content = content
             }
@@ -27,7 +27,7 @@ public enum PaymentsEvent {
             
             public typealias Content = PaymentsError
             public var content: PaymentsError
-            public static var kind: PaymentsEventKind { .loadProductsFailed }
+            public static var kind: PaymentEventKind { .loadProductsFailed }
             public init(_ content: PaymentsError) {
                 self.content = content
             }
@@ -42,7 +42,7 @@ public enum PaymentsEvent {
         
         public typealias Content = Any?
         public var content: Any?
-        public static var kind: PaymentsEventKind { .cannotMakePayments }
+        public static var kind: PaymentEventKind { .cannotMakePayments }
         public init(_ content: Any?) {
             self.content = content
         }
@@ -56,7 +56,7 @@ public enum PaymentsEvent {
             
             public typealias Content = ProductIdentifier
             public var content: ProductIdentifier
-            public static var kind: PaymentsEventKind { .paymentCompletedSuccessfully }
+            public static var kind: PaymentEventKind { .paymentCompletedSuccessfully }
             public init(_ content: ProductIdentifier) {
                 self.content = content
             }
@@ -69,7 +69,7 @@ public enum PaymentsEvent {
             
             public typealias Content = ProductIdentifier
             public var content: ProductIdentifier
-            public static var kind: PaymentsEventKind { .paymentRestoredSuccessfully }
+            public static var kind: PaymentEventKind { .paymentRestoredSuccessfully }
             public init(_ content: ProductIdentifier) {
                 self.content = content
             }
@@ -82,7 +82,7 @@ public enum PaymentsEvent {
             
             public typealias Content = Payments.DeferredAlert
             public var content: Payments.DeferredAlert
-            public static var kind: PaymentsEventKind { .paymentDeferred }
+            public static var kind: PaymentEventKind { .paymentDeferred }
             public init(_ content: Payments.DeferredAlert) {
                 self.content = content
             }
@@ -94,7 +94,7 @@ public enum PaymentsEvent {
             
             public typealias Content = PaymentsError
             public var content: PaymentsError
-            public static var kind: PaymentsEventKind { .paymentFailed }
+            public static var kind: PaymentEventKind { .paymentFailed }
             public init(_ content: PaymentsError) {
                 self.content = content
             }

@@ -10,7 +10,7 @@ import Foundation
 public protocol PaymentsNotifying {
     associatedtype Content
     var content: Content { get set }
-    static var kind: PaymentsEventKind { get }
+    static var kind: PaymentEventKind { get }
     init(_ content: Content)
 }
 
