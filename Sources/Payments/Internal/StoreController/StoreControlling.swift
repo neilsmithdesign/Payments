@@ -14,12 +14,3 @@ public protocol StoreControlling {
     func purchase(product: Product, simulateAskToBuy: Bool, completion: @escaping (PaymentResult) -> Void)
     func restorePurchases(_ completion: @escaping (PaymentResult) -> Void)
 }
-
-
-public typealias LoadedProductsResult = Result<Set<Product>, Error>
-public enum PaymentResult {
-    case success(ProductIdentifier)
-    case failure(Error?)
-    case restored(ProductIdentifier)
-    case deferred(ProductIdentifier)
-}

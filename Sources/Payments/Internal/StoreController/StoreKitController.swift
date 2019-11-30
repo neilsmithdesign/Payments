@@ -11,13 +11,15 @@ final class StoreKitController: NSObject, StoreControlling, SKProductsRequestDel
     
     
     // MARK: Init
-    init(productIdentifiers: Set<ProductIdentifier>, transactionObserver: SKPaymentTransactionObserver? = nil) {
+    init(productIdentifiers: Set<ProductIdentifier>, transactionObserver: SKPaymentTransactionObserver? = nil, paymentQueue: PaymentQueue = SKPaymentQueue.default()) {
         self.productIdentifiers = productIdentifiers
+        self.paymentQueue = paymentQueue
         super.init()
+        guard paymentQueue.canMakePayments else { return }
         if let observer = transactionObserver {
-            SKPaymentQueue.default().add(observer)
+            paymentQueue.add(observer)
         } else {
-            SKPaymentQueue.default().add(self)
+            paymentQueue.add(self)
         }
     }
     
@@ -25,6 +27,8 @@ final class StoreKitController: NSObject, StoreControlling, SKProductsRequestDel
     
     
     // MARK: Private
+    private let paymentQueue: PaymentQueue
+    
     private lazy var productsRequest: SKProductsRequest = {
         let req = SKProductsRequest(productIdentifiers: productIdentifiers)
         req.delegate = self
@@ -41,11 +45,11 @@ final class StoreKitController: NSObject, StoreControlling, SKProductsRequestDel
 extension StoreKitController {
     
     func add(transactionObserver: SKPaymentTransactionObserver) {
-        SKPaymentQueue.default().add(transactionObserver)
+        paymentQueue.add(transactionObserver)
     }
     
     func remove(transactionObserver: SKPaymentTransactionObserver) {
-        SKPaymentQueue.default().remove(transactionObserver)
+        paymentQueue.remove(transactionObserver)
     }
     
     var canMakePayments: Bool {
@@ -85,7 +89,7 @@ extension StoreKitController: SKPaymentTransactionObserver {
         if canMakePayments {
             let payment = product.storeKitPayment
             payment.simulatesAskToBuyInSandbox = simulateAskToBuy
-            SKPaymentQueue.default().add(payment)
+            paymentQueue.add(payment)
             self.paymentRequest = completion
         } else {
             completion(.failure(PaymentsError.paymentFailed(SKError(.paymentNotAllowed))))
@@ -94,7 +98,7 @@ extension StoreKitController: SKPaymentTransactionObserver {
     
     func restorePurchases(_ completion: @escaping (PaymentResult) -> Void) {
         self.paymentRequest = completion
-        SKPaymentQueue.default().restoreCompletedTransactions()
+        paymentQueue.restoreCompletedTransactions()
     }
     
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {

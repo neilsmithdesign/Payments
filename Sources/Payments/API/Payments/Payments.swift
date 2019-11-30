@@ -9,15 +9,31 @@ import Foundation
 import StoreKit
 
 
+public final class StoreKitPayments: Payments {
+    
+    public init(configuration: StoreKitConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil) {
+        let storeController = StoreKitController(
+            productIdentifiers: configuration.productIdentifiers,
+            transactionObserver: transactionObserver
+        )
+        super.init(
+            configuration: configuration,
+            storeController: storeController
+        )
+    }
+    
+}
+
+
 /// Handles all Store Kit related transactions. If not using a separate SKPaymentTransactionObserver,
 /// this class must be initiliazed at app launch and held in memory for the duration of the app life cycle.
-public final class Payments: NSObject, PaymentsProcessing {
+public class Payments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    public init(configuration: PaymentsConfiguring, storeController: StoreControlling? = nil, transactionObserver: SKPaymentTransactionObserver? = nil) {
-        self.configuration = configuration
-        self.storeController = storeController ?? StoreKitController(productIdentifiers: configuration.productIdentifiers, transactionObserver: transactionObserver)
+    public init(configuration: PaymentsConfiguring, storeController: StoreControlling) {
+        self.simulateAskToBuy = configuration.simulateAskToBuy
+        self.storeController = storeController
         super.init()
     }
     
@@ -33,13 +49,13 @@ public final class Payments: NSObject, PaymentsProcessing {
 
     
     // MARK: Private
-    private let configuration: PaymentsConfiguring
-    
     private let storeController: StoreControlling
-    
+
     private var productIdentifiers: Set<String> {
-        return configuration.productIdentifiers
+        return storeController.productIdentifiers
     }
+
+    private let simulateAskToBuy: Bool
     
 }
 
@@ -66,7 +82,7 @@ extension Payments {
 extension Payments {
 
     public func makeInAppPurchase(for product: Product) {
-        storeController.purchase(product: product, simulateAskToBuy: configuration.simulateAskToBuy) { [weak self] result in
+        storeController.purchase(product: product, simulateAskToBuy: simulateAskToBuy) { [weak self] result in
             self?.handle(payment: result)
         }
     }
