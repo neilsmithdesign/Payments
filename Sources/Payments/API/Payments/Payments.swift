@@ -6,27 +6,7 @@
 //
 
 import Foundation
-import StoreKit
 
-
-public final class StoreKitPayments: Payments {
-    
-    public init(configuration: StoreKitConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil) {
-        let storeController = StoreKitController(
-            productIdentifiers: configuration.productIdentifiers,
-            transactionObserver: transactionObserver
-        )
-        super.init(
-            configuration: configuration,
-            storeController: storeController
-        )
-    }
-    
-}
-
-
-/// Handles all Store Kit related transactions. If not using a separate SKPaymentTransactionObserver,
-/// this class must be initiliazed at app launch and held in memory for the duration of the app life cycle.
 public class Payments: NSObject, PaymentsProcessing {
     
     
@@ -56,6 +36,25 @@ public class Payments: NSObject, PaymentsProcessing {
     }
 
     private let simulateAskToBuy: Bool
+    
+}
+
+
+// MARK: - Notifications
+extension Payments {
+    
+    public func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
+        NotificationCenter.default.addObserver(
+            observer,
+            selector: selector,
+            name: kind.notification,
+            object: nil
+        )
+    }
+    
+    public func remove(observer: Any, forPaymentEvent kind: PaymentEventKind) {
+        NotificationCenter.default.removeObserver(observer, name: kind.notification, object: nil)
+    }
     
 }
 

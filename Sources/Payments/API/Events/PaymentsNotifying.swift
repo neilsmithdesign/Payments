@@ -19,10 +19,11 @@ public extension PaymentsNotifying {
         guard let content = notification.userInfo?[Self.key] as? Content else { return nil }
         self.init(content)
     }
+    static var notification: Notification.Name { kind.notification }
 }
 
+
 extension PaymentsNotifying {
-    static var notification: Notification.Name { kind.name }
     static var key: String { kind.userInfoKey }
     static func notify(with content: Content) {
         NotificationCenter.default.post(
@@ -32,3 +33,4 @@ extension PaymentsNotifying {
         )
     }
 }
+

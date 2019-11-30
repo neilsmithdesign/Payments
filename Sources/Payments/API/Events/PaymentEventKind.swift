@@ -16,9 +16,8 @@ public enum PaymentEventKind {
     case paymentRestoredSuccessfully
     case paymentDeferred
     case paymentFailed
-    
 
-    public var name: Notification.Name {
+    var notification: Notification.Name {
         return .init(root)
     }
     

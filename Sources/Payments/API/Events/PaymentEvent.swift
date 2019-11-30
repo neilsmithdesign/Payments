@@ -11,7 +11,7 @@ import StoreKit
 public enum PaymentEvent {
     
     // MARK: - Load products
-    enum LoadProducts {
+    public enum LoadProducts {
         
         public struct Succeeded: PaymentsNotifying {
             
