@@ -10,4 +10,5 @@ import Foundation
 public protocol PaymentsConfiguring {
     var productIdentifiers: Set<ProductIdentifier> { get }
     var simulateAskToBuy: Bool { get }
+    var bundle: Bundle { get }
 }

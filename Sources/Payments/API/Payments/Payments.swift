@@ -37,6 +37,13 @@ public class Payments: NSObject, PaymentsProcessing {
 
     private let simulateAskToBuy: Bool
     
+    
+    // MARK: Overrides
+    
+    /// Subclasses of 'Payments' must override this method to verify purchases
+    /// You do not need to call super.
+    public func verifyPurchases() {}
+    
 }
 
 

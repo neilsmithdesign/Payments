@@ -9,8 +9,14 @@ import StoreKit
 
 public struct StoreKitConfiguration: PaymentsConfiguring {
         
-    public init(environment: Payments.Environment, productIdentifiers: Set<ProductIdentifier>, transactionObserver: SKPaymentTransactionObserver? = nil) {
+    public init(environment: Payments.Environment,
+                bundle: Bundle,
+                receiptValidation: ReceiptValidationStrategy,
+                productIdentifiers: Set<ProductIdentifier>,
+                transactionObserver: SKPaymentTransactionObserver? = nil) {
         self.environment = environment
+        self.bundle = bundle
+        self.receiptValidation = receiptValidation
         self.productIdentifiers = productIdentifiers
         self.transactionObserver = transactionObserver
     }
@@ -20,8 +26,24 @@ public struct StoreKitConfiguration: PaymentsConfiguring {
     public var environment: Payments.Environment
     
     
+    /// The bundle used to access relevant files such as the app store receipt
+    /// and Apple root certificate if using local receipt validation
+    public var bundle: Bundle
+    
+    
     /// The product identifiers for in-app purchases which your app offers
     public var productIdentifiers: Set<ProductIdentifier>
+    
+    
+    public var simulateAskToBuy: Bool {
+        switch environment {
+        case .production: return false
+        case .sandbox(simulateAskToBuy: let simulate): return simulate
+        }
+    }
+    
+    
+    let receiptValidation: ReceiptValidationStrategy
     
     
     /// An optional transaction observer. The user of this library has the option
@@ -30,10 +52,5 @@ public struct StoreKitConfiguration: PaymentsConfiguring {
     let transactionObserver: SKPaymentTransactionObserver?
 
     
-    public var simulateAskToBuy: Bool {
-        switch environment {
-        case .production: return false
-        case .sandbox(simulateAskToBuy: let simulate): return simulate
-        }
-    }
 }
+
