@@ -1,5 +1,5 @@
 //
-//  ReceiptValidationErrors.swift
+//  LocalReceiptValidationError.swift
 //  
 //
 //  Created by Neil Smith on 02/12/2019.
@@ -7,9 +7,7 @@
 
 import Foundation
 
-enum ReceiptValidationError: Error {
-    case couldNotFindReceipt
-    case couldNotLoadReceipt(Error?)
+enum LocalReceiptValidationError: Error {
     case extractionError(ReceiptContainerExtractionError)
     case signatureError(ReceiptSignatureError)
     case parsingError(ReceiptParsingError)

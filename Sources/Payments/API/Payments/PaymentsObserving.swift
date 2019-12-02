@@ -8,6 +8,7 @@
 import Foundation
 
 public protocol PaymentsObserving: AnyObject {
+    func payments(_ payments: Payments, didValidate receipt: AppStoreReceipt)
     func payments(_ payments: Payments, didLoad products: Set<Product>)
     func payments(_ payments: Payments, didFailWith error: PaymentsError)
     func payments(_ payments: Payments, paymentWasDeferred alert: Payments.DeferredAlert)

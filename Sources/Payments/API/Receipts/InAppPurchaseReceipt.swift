@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct InAppPurchaseReceipt: Hashable {
+struct InAppPurchaseReceipt: Hashable, Decodable {
     let quantity: Int
     let id: IDs
     let date: Dates
@@ -15,14 +15,14 @@ struct InAppPurchaseReceipt: Hashable {
 
 extension InAppPurchaseReceipt {
     
-    struct IDs: Hashable {
+    struct IDs: Hashable, Decodable {
         let product: ProductIdentifier
         let transaction: TransactionIdentifier
         let originalTransaction: TransactionIdentifier
         let webOrderLineItem: Int?
     }
     
-    struct Dates: Hashable {
+    struct Dates: Hashable, Decodable {
         let purchase: Date
         let originalPurchase: Date
         let subscriptionExpiration: Date?

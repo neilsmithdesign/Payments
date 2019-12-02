@@ -7,32 +7,32 @@
 
 import Foundation
 
-struct AppStoreReceipt: Hashable {
-    let bundleID: BundleID
+public struct AppStoreReceipt: Hashable, Decodable {
+    public let bundleID: BundleID
     let appVersion: AppVersion
     let hash: Hash
     let date: Dates
     let inAppPurchaseReceipts: [InAppPurchaseReceipt]
 }
 
-extension AppStoreReceipt {
+public extension AppStoreReceipt {
     
-    struct BundleID: Hashable {
-        let name: String
-        let data: NSData
+    struct BundleID: Hashable, Decodable {
+        public let name: String
+        let data: Data
     }
     
-    struct AppVersion: Hashable {
+    struct AppVersion: Hashable, Decodable {
         let current: String
         let original: String
     }
     
-    struct Hash: Hashable {
-        let sha1: NSData
-        let opaqueValue: NSData
+    struct Hash: Hashable, Decodable {
+        let sha1: Data
+        let opaqueValue: Data
     }
     
-    struct Dates: Hashable {
+    struct Dates: Hashable, Decodable {
         let receiptCreation: Date
         let expiration: Date?
     }
