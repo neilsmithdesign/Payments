@@ -87,13 +87,13 @@ extension Payments {
 // MARK: - Purchases
 extension Payments {
 
-    public func makeInAppPurchase(for product: Product) {
+    public func purchase(_ product: Product) {
         storeController.purchase(product: product, simulateAskToBuy: simulateAskToBuy) { [weak self] result in
             self?.handle(payment: result)
         }
     }
     
-    public func restoreInAppPurchases() {
+    public func restorePreviousPurchases() {
         storeController.restorePurchases { [weak self] result in
             self?.handle(payment: result)
         }

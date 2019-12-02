@@ -13,6 +13,6 @@ public protocol PaymentsProcessing {
     func verifyPurchases()
     var availableProducts: Set<Product> { get }
     func loadProducts()
-    func makeInAppPurchase(for product: Product)
-    func restoreInAppPurchases()
+    func purchase(_ product: Product)
+    func restorePreviousPurchases()
 }

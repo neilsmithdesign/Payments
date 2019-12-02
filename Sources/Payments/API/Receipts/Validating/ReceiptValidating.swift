@@ -9,24 +9,7 @@ import Foundation
 
 protocol ReceiptValidating {
     init(_ strategy: ReceiptValidationStrategy)
-    func validate(receipt data: Data, completion: @escaping () -> Void)
+    func validate(receipt data: Data, completion: @escaping (ReceiptValidationResult) -> Void)
 }
 
-typealias ReceiptValidationResult = Result<Receipt, ReceiptValidationError>
-
-struct Receipt {
-    #warning("TO DO: Contents of the receipt as swift properties - see Strongr.")
-}
-
-enum ReceiptValidationError: Error {
-    case couldNotFindReceipt
-    case couldNotLoadReceipt(Error?)
-    case emptyReceiptContents
-    case receiptNotSigned
-    case appleRootCertificateNotFound
-    case receiptSignatureInvalid
-    case malformedReceipt
-    case malformedInAppPurchaseReceipt
-    case incorrectHash
-    case other(Error?)
-}
+typealias ReceiptValidationResult = Result<AppStoreReceipt, ReceiptValidationError>
