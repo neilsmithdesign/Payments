@@ -7,11 +7,13 @@
 
 import Foundation
 
+/// Abstract class for payment handling logic. Do not use this class.
+/// Instead, use a concrete class such as AppStorePayments.
 public class Payments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    public init(storeController: StoreControlling) {
+    init(storeController: StoreControlling) {
         self.storeController = storeController
         super.init()
     }
@@ -171,8 +173,6 @@ extension Payments {
     }
     
 }
-
-
 
 public extension Payments {
     
