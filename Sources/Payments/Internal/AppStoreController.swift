@@ -14,13 +14,15 @@ final class AppStoreController: NSObject, StoreControlling, SKProductsRequestDel
     init(productIdentifiers: Set<ProductIdentifier>,
         transactionObserver: SKPaymentTransactionObserver? = nil,
         paymentQueue: AppStorePaymentQueue = SKPaymentQueue.default(),
+        productsRequest: ProductsRequest? = nil,
         simulatesAskToBuy: Bool = false
     ) {
         self.productIdentifiers = productIdentifiers
         self.paymentQueue = paymentQueue
         self.simulatesAskToBuy = simulatesAskToBuy
+        self.productsRequest = productsRequest ?? SKProductsRequest(productIdentifiers: productIdentifiers)
         super.init()
-        guard paymentQueue.canMakePayments else { return }
+        self.productsRequest.delegate = self
         if let observer = transactionObserver {
             paymentQueue.add(observer)
         } else {
@@ -34,12 +36,7 @@ final class AppStoreController: NSObject, StoreControlling, SKProductsRequestDel
     // MARK: Private
     private let paymentQueue: AppStorePaymentQueue
     private let simulatesAskToBuy: Bool
-    
-    private lazy var productsRequest: SKProductsRequest = {
-        let req = SKProductsRequest(productIdentifiers: productIdentifiers)
-        req.delegate = self
-        return req
-    }()
+    private var productsRequest: ProductsRequest
     
     private var loadProductRequests: ((LoadedProductsResult) -> Void)?
     private var paymentRequest: ((PaymentResult) -> Void)?
@@ -59,7 +56,7 @@ extension AppStoreController {
     }
     
     var canMakePayments: Bool {
-        return SKPaymentQueue.canMakePayments()
+        return paymentQueue.canMakePayments
     }
     
 }
@@ -67,7 +64,6 @@ extension AppStoreController {
 
 // MARK: - Load products
 extension AppStoreController {
-
     
     func loadProducts(_ completion: @escaping (LoadedProductsResult) -> Void) {
         self.loadProductRequests = completion
@@ -76,12 +72,19 @@ extension AppStoreController {
     
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
         let products = Set(response.products.map { AppStoreProduct(storeKit: $0) })
-        self.loadProductRequests?(.success(products))
+        let result: LoadedProductsResult
+        if products.count == 0 {
+            result = .failure(PaymentsError.noProductsMatchingIdentifiers)
+        } else {
+            result = .success(products)
+        }
+        self.loadProductRequests?(result)
         self.loadProductRequests = nil
     }
     
     func request(_ request: SKRequest, didFailWithError error: Error) {
-        self.loadProductRequests?(.failure(error))
+        guard request is SKProductsRequest else { return }
+        self.loadProductRequests?(.failure(.productLoadRequestFailed(message: error.localizedDescription)))
         self.loadProductRequests = nil
     }
     
@@ -94,6 +97,10 @@ extension AppStoreController: SKPaymentTransactionObserver {
     func purchase(_ product: Product, completion: @escaping (PaymentResult) -> Void) {
         guard let appStoreProduct = product as? AppStoreProduct else {
             preconditionFailure("Non-App Store product requested for purcahse. Programmer error.")
+        }
+        guard self.productIdentifiers.contains(appStoreProduct.identifier) else {
+            completion(.failure(PaymentsError.paymentFailed(SKError(.storeProductNotAvailable))))
+            return
         }
         if canMakePayments {
             let payment = appStoreProduct.storeKitPayment
@@ -147,7 +154,7 @@ extension AppStoreController: SKPaymentTransactionObserver {
 
     private func handle(paymentRequest error: Error?) {
         guard let error = error as? SKError, error.code != .paymentCancelled else { return }
-        paymentRequest?(.failure(error))
+        paymentRequest?(.failure(.paymentFailed(error)))
     }
     
 }

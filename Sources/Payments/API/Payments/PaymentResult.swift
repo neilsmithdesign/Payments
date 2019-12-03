@@ -9,7 +9,7 @@ import Foundation
 
 public enum PaymentResult {
     case success(ProductIdentifier)
-    case failure(Error?)
+    case failure(PaymentsError)
     case restored(ProductIdentifier)
     case deferred(ProductIdentifier)
 }

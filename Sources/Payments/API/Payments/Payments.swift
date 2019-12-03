@@ -124,11 +124,11 @@ extension Payments {
         }
     }
     
-    private func failedToLoadProducts(with error: Error) {
-        let productLoadError = PaymentsError.productLoadRequestFailed(message: error.localizedDescription)
+    private func failedToLoadProducts(with error: PaymentsError) {
+        guard case PaymentsError.productLoadRequestFailed = error else { return }
         onMainThread {
-            self.observer?.payments(self, didFailWith: productLoadError)
-            Payments.Event.LoadProducts.Failed.notify(with: productLoadError)
+            self.observer?.payments(self, didFailWith: error)
+            Payments.Event.LoadProducts.Failed.notify(with: error)
         }
     }
     

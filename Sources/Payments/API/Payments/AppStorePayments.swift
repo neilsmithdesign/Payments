@@ -11,16 +11,26 @@ public final class AppStorePayments: Payments {
     
     
     // MARK: Interface
-    public init(configuration: AppStoreConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil) {
+    public convenience init(configuration: AppStoreConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil, productsRequest: ProductsRequest? = nil) {
+        let controller = AppStoreController(
+            productIdentifiers: configuration.productIdentifiers,
+            transactionObserver: transactionObserver,
+            productsRequest: productsRequest,
+            simulatesAskToBuy: configuration.simulateAskToBuy
+        )
+        self.init(
+            controller: controller,
+            configuration: configuration,
+            transactionObserver: transactionObserver,
+            productsRequest: productsRequest
+        )
+    }
+    
+    init(controller: AppStoreController, configuration: AppStoreConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil, productsRequest: ProductsRequest? = nil) {
         self.configuration = configuration
         self.receiptValidator = configuration.receiptValidator
         self.receiptLoader = configuration.receiptLoader
-        let storeController = AppStoreController(
-            productIdentifiers: configuration.productIdentifiers,
-            transactionObserver: transactionObserver,
-            simulatesAskToBuy: configuration.simulateAskToBuy
-        )
-        super.init(storeController: storeController)
+        super.init(storeController: controller)
     }
     
     

@@ -45,5 +45,10 @@ extension PaymentsError: Equatable {
         }
     }
     
+}
 
+extension PaymentsError {
+    
+    static let noProductsMatchingIdentifiers: PaymentsError = .productLoadRequestFailed(message: "Unable to load products for requested Identifiers.")
+    
 }
