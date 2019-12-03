@@ -24,7 +24,7 @@ class SKPaymentQueueMock: SKPaymentQueue {
     
 }
 
-final class SKPaymentQueueCannotMakePaymentsMock: PaymentQueue {
+final class SKPaymentQueueCannotMakePaymentsMock: AppStorePaymentQueue {
     
     weak var observer: SKPaymentTransactionObserver?
     

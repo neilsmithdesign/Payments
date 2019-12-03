@@ -7,4 +7,4 @@
 
 import Foundation
 
-typealias ReceiptValidationResult = Result<AppStoreReceipt, ReceiptValidationError>
+public typealias ReceiptValidationResult = Result<AppStoreReceipt, ReceiptValidationError>

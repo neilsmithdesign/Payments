@@ -7,14 +7,16 @@
 
 import Foundation
 
-struct RemoteAppStoreReceiptValidator: ReceiptValidatingRemotely {
+struct RemoteReceiptValidator: ReceiptValidatingRemotely {
     
     private let url: URL
     
-    init(url: URL) throws {
+    init(url: URL) {
         let sandboxURL = URL(string: "https://sandbox.itunes.apple.com/verifyReceipt")!
         let productionURL = URL(string: "https://buy.itunes.apple.com/verifyReceipt")!
-        guard url != sandboxURL && url != productionURL else { throw RemoteReceiptValidationError.attemptToCallAppStoreEndPointFromClientDevice }
+        guard url != sandboxURL && url != productionURL else {
+            preconditionFailure("App Store receipt verification end point used directly from device. This approach is subject to man-in-the-middle attacks.")
+        }
         self.url = url
     }
     

@@ -7,12 +7,16 @@
 
 import Foundation
 
-struct LocalReceiptValidationInput {
+public struct LocalReceiptValidationInput {
     let rootCertificateName: String
     let bundle: Bundle
+    public init(rootCertificateName: String, bundle: Bundle) {
+        self.rootCertificateName = rootCertificateName
+        self.bundle = bundle
+    }
 }
 
-protocol ReceiptValidatingLocally {
+public protocol ReceiptValidatingLocally {
     init(_ input: LocalReceiptValidationInput)
     func validate(receipt data: Data) -> ReceiptValidationResult
 }

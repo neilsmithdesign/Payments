@@ -7,26 +7,26 @@
 
 import Foundation
 
-struct InAppPurchaseReceipt: Hashable, Decodable {
-    let quantity: Int
-    let id: IDs
-    let date: Dates
+public struct InAppPurchaseReceipt: Hashable, Decodable {
+    public let quantity: Int
+    public let id: IDs
+    public let date: Dates
 }
 
-extension InAppPurchaseReceipt {
+public extension InAppPurchaseReceipt {
     
     struct IDs: Hashable, Decodable {
-        let product: ProductIdentifier
-        let transaction: TransactionIdentifier
-        let originalTransaction: TransactionIdentifier
-        let webOrderLineItem: Int?
+        public let product: ProductIdentifier
+        public let transaction: TransactionIdentifier
+        public let originalTransaction: TransactionIdentifier
+        public let webOrderLineItem: Int?
     }
     
     struct Dates: Hashable, Decodable {
-        let purchase: Date
-        let originalPurchase: Date
-        let subscriptionExpiration: Date?
-        let cancellation: Date?
+        public let purchase: Date
+        public let originalPurchase: Date
+        public let subscriptionExpiration: Date?
+        public let cancellation: Date?
     }
     
 }
@@ -89,4 +89,4 @@ extension InAppPurchaseReceipt {
     
 }
 
-typealias TransactionIdentifier = String
+public typealias TransactionIdentifier = String

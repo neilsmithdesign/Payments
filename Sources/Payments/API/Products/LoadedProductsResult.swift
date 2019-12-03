@@ -7,4 +7,4 @@
 
 import Foundation
 
-public typealias LoadedProductsResult = Result<Set<Product>, Error>
+public typealias LoadedProductsResult = Result<Set<AppStoreProduct>, Error>

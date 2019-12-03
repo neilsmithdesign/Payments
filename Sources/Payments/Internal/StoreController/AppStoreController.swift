@@ -1,5 +1,5 @@
 //
-//  StoreKitController.swift
+//  AppStoreController.swift
 //  
 //
 //  Created by Neil Smith on 29/11/2019.
@@ -7,13 +7,18 @@
 
 import StoreKit
 
-final class StoreKitController: NSObject, StoreControlling, SKProductsRequestDelegate {
+final class AppStoreController: NSObject, StoreControlling, SKProductsRequestDelegate {
     
     
     // MARK: Init
-    init(productIdentifiers: Set<ProductIdentifier>, transactionObserver: SKPaymentTransactionObserver? = nil, paymentQueue: PaymentQueue = SKPaymentQueue.default()) {
+    init(productIdentifiers: Set<ProductIdentifier>,
+        transactionObserver: SKPaymentTransactionObserver? = nil,
+        paymentQueue: AppStorePaymentQueue = SKPaymentQueue.default(),
+        simulatesAskToBuy: Bool = false
+    ) {
         self.productIdentifiers = productIdentifiers
         self.paymentQueue = paymentQueue
+        self.simulatesAskToBuy = simulatesAskToBuy
         super.init()
         guard paymentQueue.canMakePayments else { return }
         if let observer = transactionObserver {
@@ -27,7 +32,8 @@ final class StoreKitController: NSObject, StoreControlling, SKProductsRequestDel
     
     
     // MARK: Private
-    private let paymentQueue: PaymentQueue
+    private let paymentQueue: AppStorePaymentQueue
+    private let simulatesAskToBuy: Bool
     
     private lazy var productsRequest: SKProductsRequest = {
         let req = SKProductsRequest(productIdentifiers: productIdentifiers)
@@ -42,7 +48,7 @@ final class StoreKitController: NSObject, StoreControlling, SKProductsRequestDel
 
 
 // MARK: - Observations
-extension StoreKitController {
+extension AppStoreController {
     
     func add(transactionObserver: SKPaymentTransactionObserver) {
         paymentQueue.add(transactionObserver)
@@ -60,7 +66,7 @@ extension StoreKitController {
 
 
 // MARK: - Load products
-extension StoreKitController {
+extension AppStoreController {
 
     
     func loadProducts(_ completion: @escaping (LoadedProductsResult) -> Void) {
@@ -69,7 +75,7 @@ extension StoreKitController {
     }
     
     func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-        let products = Set(response.products.map { Product(storeKit: $0) })
+        let products = Set(response.products.map { AppStoreProduct(storeKit: $0) })
         self.loadProductRequests?(.success(products))
         self.loadProductRequests = nil
     }
@@ -83,12 +89,15 @@ extension StoreKitController {
 
 
 // MARK: - Purchases
-extension StoreKitController: SKPaymentTransactionObserver {
+extension AppStoreController: SKPaymentTransactionObserver {
     
-    func purchase(product: Product, simulateAskToBuy: Bool, completion: @escaping (PaymentResult) -> Void) {
+    func purchase(_ product: Product, completion: @escaping (PaymentResult) -> Void) {
+        guard let appStoreProduct = product as? AppStoreProduct else {
+            preconditionFailure("Non-App Store product requested for purcahse. Programmer error.")
+        }
         if canMakePayments {
-            let payment = product.storeKitPayment
-            payment.simulatesAskToBuyInSandbox = simulateAskToBuy
+            let payment = appStoreProduct.storeKitPayment
+            payment.simulatesAskToBuyInSandbox = simulatesAskToBuy
             paymentQueue.add(payment)
             self.paymentRequest = completion
         } else {

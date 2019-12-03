@@ -1,5 +1,5 @@
 //
-//  StoreKitControllerTests.swift
+//  AppStoreControllerTests.swift
 //  
 //
 //  Created by Neil Smith on 30/11/2019.
@@ -9,9 +9,9 @@ import XCTest
 import StoreKit
 @testable import Payments
 
-final class StoreKitControllerTests: XCTestCase {
+final class AppStoreControllerTests: XCTestCase {
     
-    var controller: StoreKitController!
+    var controller: AppStoreController!
 
     
     func testTransactionObserverExistsWhenNotSupplied() {
@@ -20,7 +20,7 @@ final class StoreKitControllerTests: XCTestCase {
         let paymentQueue = SKPaymentQueueMock()
         
         // When
-        controller = StoreKitController(productIdentifiers: [], transactionObserver: nil, paymentQueue: paymentQueue)
+        controller = AppStoreController(productIdentifiers: [], transactionObserver: nil, paymentQueue: paymentQueue)
         
         // Then
         XCTAssertNotNil(paymentQueue.observer)
@@ -37,7 +37,7 @@ final class StoreKitControllerTests: XCTestCase {
         let paymentQueue = SKPaymentQueueMock()
         
         // When
-        controller = StoreKitController(productIdentifiers: [], transactionObserver: observer, paymentQueue: paymentQueue)
+        controller = AppStoreController(productIdentifiers: [], transactionObserver: observer, paymentQueue: paymentQueue)
         
         // Then
         XCTAssertNotNil(paymentQueue.observer)
@@ -50,7 +50,7 @@ final class StoreKitControllerTests: XCTestCase {
         let paymentQueue = SKPaymentQueueCannotMakePaymentsMock()
         
         // When
-        controller = StoreKitController(productIdentifiers: [], transactionObserver: nil, paymentQueue: paymentQueue)
+        controller = AppStoreController(productIdentifiers: [], transactionObserver: nil, paymentQueue: paymentQueue)
         
         // Then
         XCTAssertNil(paymentQueue.observer)

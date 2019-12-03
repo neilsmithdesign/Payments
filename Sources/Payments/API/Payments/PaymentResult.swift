@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  PaymentResult.swift
 //  
 //
 //  Created by Neil Smith on 30/11/2019.

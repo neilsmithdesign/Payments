@@ -5,57 +5,31 @@
 //  Created by Neil Smith on 26/08/2019.
 //
 
-import StoreKit
+import Foundation
 
-public struct Product {
+public class Product: ProductDescription {
     
-    public let title: String
-    public let description: String
-    public let price: String
-    public let numericalPrice: NSDecimalNumber
-    public let identifier: String
-    public let storeKitProduct: SKProduct
+    public var title: String
+    public var description: String
+    public var price: String
+    public var numericalPrice: NSDecimalNumber
+    public var identifier: String
     
-    var storeKitPayment: SKMutablePayment {
-        return SKMutablePayment(product: storeKitProduct)
-    }
-    
-    public init(storeKit product: SKProduct) {
-        self.title = product.localizedTitle
-        self.description = product.localizedDescription
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        if formatter.locale != product.priceLocale {
-            formatter.locale = product.priceLocale
-        }
-        self.numericalPrice = product.price
-        self.price = formatter.string(from: product.price) ?? "\(product.price)"
-        self.identifier = product.productIdentifier
-        self.storeKitProduct = product
-    }
-}
-
-public extension Product {
-    
-    static func createMock(title: String, description: String, price: Decimal, identifier: String) -> Product {
-        return .init(title: title, description: description, price: price, identifier: identifier)
-    }
-    
-    private init(title: String, description: String, price: Decimal, identifier: String) {
+    init(title: String, description: String, price: String, numericalPrice: NSDecimalNumber, identifier: String) {
         self.title = title
         self.description = description
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .currency
-        let numericalPrice = NSDecimalNumber(decimal: price)
+        self.price = price
         self.numericalPrice = numericalPrice
-        self.price = formatter.string(from: numericalPrice) ?? ""
         self.identifier = identifier
-        self.storeKitProduct = SKProduct()
     }
-    
+
 }
 
 extension Product: Hashable {
+    
+    public static func == (lhs: Product, rhs: Product) -> Bool {
+        return lhs.identifier == rhs.identifier
+    }
     
     public func hash(into hasher: inout Hasher) {
         hasher.combine(identifier)

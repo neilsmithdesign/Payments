@@ -11,8 +11,7 @@ public class Payments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    public init(configuration: PaymentsConfiguring, storeController: StoreControlling) {
-        self.simulateAskToBuy = configuration.simulateAskToBuy
+    public init(storeController: StoreControlling) {
         self.storeController = storeController
         super.init()
     }
@@ -34,8 +33,6 @@ public class Payments: NSObject, PaymentsProcessing {
     private var productIdentifiers: Set<String> {
         return storeController.productIdentifiers
     }
-
-    private let simulateAskToBuy: Bool
     
     
     // MARK: Overrides
@@ -50,7 +47,7 @@ public class Payments: NSObject, PaymentsProcessing {
 // MARK: - Notifications
 extension Payments {
     
-    public func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
+    public func add(observer: Any, forPaymentEvent kind: Payments.EventKind, selector: Selector) {
         NotificationCenter.default.addObserver(
             observer,
             selector: selector,
@@ -59,7 +56,7 @@ extension Payments {
         )
     }
     
-    public func remove(observer: Any, forPaymentEvent kind: PaymentEventKind) {
+    public func remove(observer: Any, forPaymentEvent kind: Payments.EventKind) {
         NotificationCenter.default.removeObserver(observer, name: kind.notification, object: nil)
     }
     
@@ -88,7 +85,7 @@ extension Payments {
 extension Payments {
 
     public func purchase(_ product: Product) {
-        storeController.purchase(product: product, simulateAskToBuy: simulateAskToBuy) { [weak self] result in
+        storeController.purchase(product) { [weak self] result in
             self?.handle(payment: result)
         }
     }
@@ -121,7 +118,7 @@ extension Payments {
     private func didLoad(_ products: Set<Product>) {
         onMainThread {
             self.observer?.payments(self, didLoad: products)
-            PaymentEvent.LoadProducts.Succeeded.notify(with: products)
+            Payments.Event.LoadProducts.Succeeded.notify(with: products)
         }
     }
     
@@ -129,28 +126,28 @@ extension Payments {
         let productLoadError = PaymentsError.productLoadRequestFailed(message: error.localizedDescription)
         onMainThread {
             self.observer?.payments(self, didFailWith: productLoadError)
-            PaymentEvent.LoadProducts.Failed.notify(with: productLoadError)
+            Payments.Event.LoadProducts.Failed.notify(with: productLoadError)
         }
     }
     
     private func cannotMakePayments() {
         onMainThread {
             self.observer?.userCannotMake(payments: self)
-            PaymentEvent.CannotMakePayments.notify(with: nil)
+            Payments.Event.CannotMakePayments.notify(with: nil)
         }
     }
     
     private func didCompletePurchase(for productIdentifier: ProductIdentifier) {
         onMainThread {
             self.observer?.didCompletePurchase(self)
-            PaymentEvent.Payment.Complete.notify(with: productIdentifier)
+            Payments.Event.Payment.Complete.notify(with: productIdentifier)
         }
     }
     
     private func didRestorePurchases(for productIdentifier: ProductIdentifier) {
         onMainThread {
             self.observer?.didRestorePurchases(self)
-            PaymentEvent.Payment.Restored.notify(with: productIdentifier)
+            Payments.Event.Payment.Restored.notify(with: productIdentifier)
         }
     }
     
@@ -158,14 +155,14 @@ extension Payments {
         let alert = DeferredAlert.standardMessage(for: productIdentifier)
         onMainThread {
             self.observer?.payments(self, paymentWasDeferred: alert)
-            PaymentEvent.Payment.Deferred.notify(with: alert)
+            Payments.Event.Payment.Deferred.notify(with: alert)
         }
     }
     
     private func paymentFailed(with error: PaymentsError) {
         onMainThread {
             self.observer?.payments(self, didFailWith: error)
-            PaymentEvent.Payment.Failed.notify(with: error)
+            Payments.Event.Payment.Failed.notify(with: error)
         }
     }
     

@@ -7,8 +7,7 @@
 
 import Foundation
 
-protocol ReceiptValidating {
-    init(_ strategy: ReceiptValidationStrategy, localValidator: ReceiptValidatingLocally?, remoteValidator: ReceiptValidatingRemotely?)
+public protocol ReceiptValidating {
     func validate(receipt data: Data, completion: @escaping (ReceiptValidationResult) -> Void)
 }
 

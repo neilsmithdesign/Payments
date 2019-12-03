@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum LocalReceiptValidationError: Error {
+public enum LocalReceiptValidationError: Error {
     case extractionError(ReceiptContainerExtractionError)
     case signatureError(ReceiptSignatureError)
     case parsingError(ReceiptParsingError)
@@ -15,27 +15,27 @@ enum LocalReceiptValidationError: Error {
     case other(Error?)
 }
 
-enum ReceiptContainerExtractionError: Error {
+public enum ReceiptContainerExtractionError: Error {
     case emptyContents
 }
 
-enum ReceiptSignatureVerificationError: Error {
+public enum ReceiptSignatureVerificationError: Error {
     case notSigned
     case rootCertificateNotFound
 }
 
-enum ReceiptSignatureAuthenticationError: Error {
+public enum ReceiptSignatureAuthenticationError: Error {
     case invalid
 }
 
-enum ReceiptSignatureError: Error {
+public enum ReceiptSignatureError: Error {
     case verificationError(ReceiptSignatureVerificationError)
     case authenticationError(ReceiptSignatureAuthenticationError)
 }
 
-enum ReceiptParsingError: Error {
+public enum ReceiptParsingError: Error {
     case malformed(ReceiptKind)
-    enum ReceiptKind {
+    public enum ReceiptKind {
         case appReceipt
         case inAppPurchaseReceipt
     }

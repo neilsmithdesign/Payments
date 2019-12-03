@@ -9,32 +9,32 @@ import Foundation
 
 public struct AppStoreReceipt: Hashable, Decodable {
     public let bundleID: BundleID
-    let appVersion: AppVersion
-    let hash: Hash
-    let date: Dates
-    let inAppPurchaseReceipts: [InAppPurchaseReceipt]
+    public let appVersion: AppVersion
+    public let hash: Hash
+    public let date: Dates
+    public let inAppPurchaseReceipts: [InAppPurchaseReceipt]
 }
 
 public extension AppStoreReceipt {
     
     struct BundleID: Hashable, Decodable {
         public let name: String
-        let data: Data
+        public let data: Data
     }
     
     struct AppVersion: Hashable, Decodable {
-        let current: String
-        let original: String
+        public let current: String
+        public let original: String
     }
     
     struct Hash: Hashable, Decodable {
-        let sha1: Data
-        let opaqueValue: Data
+        public let sha1: Data
+        public let opaqueValue: Data
     }
     
     struct Dates: Hashable, Decodable {
-        let receiptCreation: Date
-        let expiration: Date?
+        public let receiptCreation: Date
+        public let expiration: Date?
     }
     
 }

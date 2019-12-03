@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum RemoteReceiptValidationError: Error {
+public enum RemoteReceiptValidationError: Error {
     case attemptToCallAppStoreEndPointFromClientDevice
     case serverError(Error)
     case missingResponse

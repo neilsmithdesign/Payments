@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ReceiptValidationError: Error {
+public enum ReceiptValidationError: Error {
     case local(LocalReceiptValidationError)
     case remote(RemoteReceiptValidationError)
 }

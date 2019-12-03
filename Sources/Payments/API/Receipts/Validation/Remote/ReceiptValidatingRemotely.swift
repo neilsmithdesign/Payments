@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ReceiptValidatingRemotely {
-    init(url: URL) throws
+public protocol ReceiptValidatingRemotely {
+    init(url: URL)
     func validate(receipt data: Data, completion: @escaping (ReceiptValidationResult) -> Void)
 }
