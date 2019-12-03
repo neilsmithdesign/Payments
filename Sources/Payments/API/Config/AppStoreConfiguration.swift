@@ -27,9 +27,9 @@ public struct AppStoreConfiguration {
     }
 
     /// Private initializer utilized to provide mocking ability
-    private init(environment: Environment,
+    public init(environment: Environment,
                 bundle: Bundle,
-                receiptValidator: ReceiptValidating,
+                receiptValidator: ReceiptValidating? = nil,
                 receiptLoader: ReceiptLoading? = nil,
                 fileInspector: FileInspector = FileManager.default,
                 productIdentifiers: Set<ProductIdentifier>,
@@ -38,7 +38,7 @@ public struct AppStoreConfiguration {
         self.bundle = bundle
         self.productIdentifiers = productIdentifiers
         self.receiptValidator = receiptValidator
-        self.receiptLoader = receiptLoader ?? AppStoreReceiptLoader(location: bundle)
+        self.receiptLoader = receiptLoader
         self.fileInspector = fileInspector
         self.transactionObserver = transactionObserver
     }
@@ -66,11 +66,11 @@ public struct AppStoreConfiguration {
     
     
     /// Performs validation of the App Store receipt
-    let receiptValidator: ReceiptValidating
+    let receiptValidator: ReceiptValidating?
     
     
     /// Loads the App Store receipt from the appropriate location
-    let receiptLoader: ReceiptLoading
+    let receiptLoader: ReceiptLoading?
     
     
     
@@ -89,23 +89,6 @@ public extension AppStoreConfiguration {
     enum Environment {
         case sandbox(simulateAskToBuy: Bool)
         case production
-    }
-    
-}
-
-public extension AppStoreConfiguration {
-    
-    static func mock(with productIdentifiers: Set<ProductIdentifier>,
-                     simulateAskToBuy: Bool = false,
-                     transactionObserver: SKPaymentTransactionObserver? = nil) -> AppStoreConfiguration {
-        return .init(
-            environment: .sandbox(simulateAskToBuy: simulateAskToBuy),
-            bundle: .main,
-            receiptValidator: MockReceiptValidator(),
-            receiptLoader: MockReceiptLoader(),
-            productIdentifiers: productIdentifiers,
-            transactionObserver: transactionObserver
-        )
     }
     
 }

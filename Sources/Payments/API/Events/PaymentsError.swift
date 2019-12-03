@@ -9,6 +9,7 @@ import StoreKit
 
 public enum PaymentsError: Error {
     
+    case receiptError(ReceiptError)
     case productLoadRequestFailed(message: String)
     case paymentFailed(SKError)
     case networkUnavailable

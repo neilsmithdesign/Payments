@@ -16,6 +16,7 @@ public struct ReceiptValidationConfiguration {
         self.loader = loader
         self.validationKind = validationKind
     }
+    
     var validator: ReceiptValidating {
         switch validationKind {
         case .local(let input): return ReceiptValidator(.local(LocalReceiptValidator(input)))
@@ -27,4 +28,15 @@ public struct ReceiptValidationConfiguration {
         case local(LocalReceiptValidationInput)
         case remote(URL)
     }
+}
+
+public extension ReceiptValidationConfiguration {
+    
+    static func appStore(validation kind: ValidationKind, bundle: Bundle) -> ReceiptValidationConfiguration {
+        return self.init(
+            loader: AppStoreReceiptLoader(location: bundle),
+            validationKind: kind
+        )
+    }
+    
 }

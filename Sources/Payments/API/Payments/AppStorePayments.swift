@@ -25,7 +25,10 @@ public final class AppStorePayments: Payments {
     
     
     public override func verifyPurchases() {
-        receiptLoader.load(using: configuration.fileInspector) { [weak self] result in
+        guard let loader = receiptLoader else {
+            return
+        }
+        loader.load(using: configuration.fileInspector) { [weak self] result in
             self?.handle(receiptLoading: result)
         }
     }
@@ -34,13 +37,14 @@ public final class AppStorePayments: Payments {
         switch result {
         case .success(let data):
             self.receiptData = data
-            receiptValidator.validate(receipt: data) { [weak self] validationResult in
+            guard let validator = receiptValidator else {
+                return
+            }
+            validator.validate(receipt: data) { [weak self] validationResult in
                 self?.handle(validation: validationResult)
             }
         case .failure(let error):
-            print(error.localizedDescription)
-            fatalError()
-            #warning("TO DO: Handle receipt loading errors")
+            observer?.payments(self, didFailWith: .receiptError(.loading(error)))
         }
     }
 
@@ -49,15 +53,14 @@ public final class AppStorePayments: Payments {
         case .success(let receipt):
             observer?.payments(self, didValidate: receipt)
         case .failure(let error):
-            print(error.localizedDescription)
-            fatalError()
+            observer?.payments(self, didFailWith: .receiptError(.validation(error)))
         }
     }
     
     // MARK: Private
     private let configuration: AppStoreConfiguration
-    private let receiptValidator: ReceiptValidating
-    private let receiptLoader: ReceiptLoading
+    private let receiptValidator: ReceiptValidating?
+    private let receiptLoader: ReceiptLoading?
     private var receiptData: Data?
     
 }

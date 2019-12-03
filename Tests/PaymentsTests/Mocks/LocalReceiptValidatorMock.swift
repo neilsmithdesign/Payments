@@ -1,13 +1,14 @@
 //
-//  MockLocalReceiptValidator.swift
+//  LocalReceiptValidatorMock.swift
 //  
 //
 //  Created by Neil Smith on 02/12/2019.
 //
 
 import Foundation
+@testable import Payments
 
-struct MockLocalReceiptValidator: ReceiptValidatingLocally {
+struct LocalReceiptValidatorMock: ReceiptValidatingLocally {
     
     init(_ input: LocalReceiptValidationInput = .mock) {}
     
