@@ -15,20 +15,20 @@ final class PaymentsObserverSpy: PaymentsObserving {
     var isReceiptValidated: Bool = false
     var didLoadProducts: Bool = false
     
-    func payments(_ payments: Payments, didValidate receipt: AppStoreReceipt) {
+    func payments(_ payments: PaymentsProcessing, didValidate receipt: AppStoreReceipt) {
         isReceiptValidated = true
     }
     
-    func payments(_ payments: Payments, didLoad products: Set<Product>) {
+    func payments(_ payments: PaymentsProcessing, didLoad products: Set<Product>) {
         DispatchQueue.main.async {
             self.didLoadProducts = true            
         }
     }
     
-    func payments(_ payments: Payments, didFailWith error: PaymentsError) {}
-    func payments(_ payments: Payments, paymentWasDeferred alert: Payments.DeferredAlert) {}
-    func didRestorePurchases(_ payments: Payments) {}
-    func didCompletePurchase(_ payments: Payments) {}
-    func userCannotMake(payments: Payments) {}
+    func payments(_ payments: PaymentsProcessing, didFailWith error: PaymentsError) {}
+    func payments(_ payments: PaymentsProcessing, paymentWasDeferred alert: PaymentDeferredAlert) {}
+    func didRestorePurchases(_ payments: PaymentsProcessing) {}
+    func didCompletePurchase(_ payments: PaymentsProcessing) {}
+    func userCannotMake(payments: PaymentsProcessing) {}
     
 }

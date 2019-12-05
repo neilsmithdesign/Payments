@@ -7,7 +7,7 @@
 
 import StoreKit
 
-public final class AppStorePayments: Payments {
+public final class AppStorePayments: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
@@ -30,11 +30,41 @@ public final class AppStorePayments: Payments {
         self.configuration = configuration
         self.receiptValidator = configuration.receiptValidator
         self.receiptLoader = configuration.receiptLoader
-        super.init(storeController: controller)
+        self.storeController = controller
     }
     
+    public weak var observer: PaymentsObserving?
+
     
-    public override func verifyPurchases() {
+    // MARK: Read only
+    public private (set) var availableProducts: Set<Product> = []
+
+    public var canMakePayments: Bool {
+        return storeController.canMakePayments
+    }
+
+    
+    // MARK: Private
+    private let storeController: StoreControlling
+
+    private var productIdentifiers: Set<String> {
+        return storeController.productIdentifiers
+    }
+
+    
+    // MARK: Private
+    private let configuration: AppStoreConfiguration
+    private let receiptValidator: ReceiptValidating?
+    private let receiptLoader: ReceiptLoading?
+    private var receiptData: Data?
+    
+}
+
+
+// MARK: - Receipt Verification
+extension AppStorePayments {
+    
+    public func verifyPurchases() {
         guard let loader = receiptLoader else {
             return
         }
@@ -67,10 +97,149 @@ public final class AppStorePayments: Payments {
         }
     }
     
-    // MARK: Private
-    private let configuration: AppStoreConfiguration
-    private let receiptValidator: ReceiptValidating?
-    private let receiptLoader: ReceiptLoading?
-    private var receiptData: Data?
+}
+
+
+// MARK: - Notifications
+extension AppStorePayments {
+    
+    public func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
+        NotificationCenter.default.addObserver(
+            observer,
+            selector: selector,
+            name: kind.notification,
+            object: nil
+        )
+    }
+    
+    public func remove(observer: Any, forPaymentEvent kind: PaymentEventKind) {
+        NotificationCenter.default.removeObserver(observer, name: kind.notification, object: nil)
+    }
+    
+}
+
+
+// MARK: - Load products
+public extension AppStorePayments {
+    
+    func loadProducts() {
+        storeController.loadProducts { [weak self] result in
+            switch result {
+            case .success(let products):
+                self?.availableProducts = products
+                self?.didLoad(products)
+            case .failure(let error):
+                self?.failedToLoadProducts(with: error)
+            }
+        }
+    }
+    
+}
+
+
+// MARK: - Purchases
+extension AppStorePayments {
+
+    public func purchase(_ product: Product) {
+        storeController.purchase(product) { [weak self] result in
+            self?.handle(payment: result)
+        }
+    }
+    
+    public func restorePreviousPurchases() {
+        storeController.restorePurchases { [weak self] result in
+            self?.handle(payment: result)
+        }
+    }
+    
+    private func handle(payment result: PaymentResult) {
+        switch result {
+        case .success(let identifier):
+            self.didCompletePurchase(for: identifier)
+        case .restored(let identifier):
+            self.didRestorePurchases(for: identifier)
+        case .deferred(let identifier):
+            self.paymentWasDeferred(for: identifier)
+        case .failure(let error):
+            self.paymentFailed(with: PaymentsError(error))
+        }
+    }
+    
+}
+
+
+// MARK: - Observer calls
+extension AppStorePayments {
+    
+    private func didLoad(_ products: Set<Product>) {
+        onMainThread {
+            self.observer?.payments(self, didLoad: products)
+            PaymentEvent.LoadProducts.Succeeded.notify(with: products)
+        }
+    }
+    
+    private func failedToLoadProducts(with error: PaymentsError) {
+        guard case PaymentsError.productLoadRequestFailed = error else { return }
+        onMainThread {
+            self.observer?.payments(self, didFailWith: error)
+            PaymentEvent.LoadProducts.Failed.notify(with: error)
+        }
+    }
+    
+    private func cannotMakePayments() {
+        onMainThread {
+            self.observer?.userCannotMake(payments: self)
+            PaymentEvent.CannotMakePayments.notify(with: nil)
+        }
+    }
+    
+    private func didCompletePurchase(for productIdentifier: ProductIdentifier) {
+        onMainThread {
+            self.observer?.didCompletePurchase(self)
+            PaymentEvent.Payment.Complete.notify(with: productIdentifier)
+        }
+    }
+    
+    private func didRestorePurchases(for productIdentifier: ProductIdentifier) {
+        onMainThread {
+            self.observer?.didRestorePurchases(self)
+            PaymentEvent.Payment.Restored.notify(with: productIdentifier)
+        }
+    }
+    
+    private func paymentWasDeferred(for productIdentifier: ProductIdentifier) {
+        let alert = PaymentDeferredAlert.standardMessage(for: productIdentifier)
+        onMainThread {
+            self.observer?.payments(self, paymentWasDeferred: alert)
+            PaymentEvent.Payment.Deferred.notify(with: alert)
+        }
+    }
+    
+    private func paymentFailed(with error: PaymentsError) {
+        onMainThread {
+            self.observer?.payments(self, didFailWith: error)
+            PaymentEvent.Payment.Failed.notify(with: error)
+        }
+    }
+    
+    private func onMainThread(_ closure: @escaping () -> Void) {
+        DispatchQueue.main.async { closure() }
+    }
+    
+}
+
+public struct PaymentDeferredAlert {
+    
+    public let title: String
+    public let message: String
+    public let productIdentifier: String
+    
+    static func standardMessage(for productIdentifier: String) -> PaymentDeferredAlert {
+        return .init(
+            title: "Waiting For Approval",
+            message: "Thank you! You can continue to use the app whilst your purchase is pending approval from your family organizer.",
+            productIdentifier: productIdentifier
+        )
+    }
     
 }

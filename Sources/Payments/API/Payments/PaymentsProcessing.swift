@@ -14,10 +14,10 @@ public protocol PaymentsProcessing {
     var observer: PaymentsObserving? { get set }
     
     /// Add an observer for a specific payment event (sent via NotificationCenter)
-    func add(observer: Any, forPaymentEvent kind: Payments.EventKind, selector: Selector)
+    func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector)
     
     /// Remove an observer for a specific payment event (sent via NotificationCenter)
-    func remove(observer: Any, forPaymentEvent kind: Payments.EventKind)
+    func remove(observer: Any, forPaymentEvent kind: PaymentEventKind)
     
     /// Verify the user's existing purchases if they exist. When interacting with the App Store
     /// on iOS, this method retrieves the encrypted App Store receipt from the user's device
