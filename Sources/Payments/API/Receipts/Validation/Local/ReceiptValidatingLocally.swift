@@ -8,8 +8,8 @@
 import Foundation
 
 public struct LocalReceiptValidationInput {
-    let rootCertificateName: String
-    let bundle: Bundle
+    public let rootCertificateName: String
+    public let bundle: Bundle
     public init(rootCertificateName: String, bundle: Bundle) {
         self.rootCertificateName = rootCertificateName
         self.bundle = bundle

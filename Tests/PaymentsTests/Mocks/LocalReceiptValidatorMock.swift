@@ -31,23 +31,23 @@ private extension AppStoreReceipt {
     static var mockReceipt: AppStoreReceipt {
         let iap = InAppPurchaseReceipt(
             quantity: 1,
-            id: .init(product: "fake.product.id",
+            id: InAppPurchaseReceipt.IDs(product: "fake.product.id",
                       transaction: "fake.transaction.id",
                       originalTransaction: "fake.original.transaction.id",
-                      webOrderLineItem: nil
+                      webOrderLineItem: nil,
+                      appItem: nil,
+                      externalVersion: nil
             ),
-            date: .init(
-                purchase: Date(),
-                originalPurchase: Date(),
-                subscriptionExpiration: nil,
-                cancellation: nil
-            )
+            purchaseDate: Date(),
+            originalPurchaseDate: Date(),
+            subscription: nil
         )
-        return .init(bundleID: .init(name: "fake.bundle.id", data: Data()),
-                     appVersion: .init(current: "2.0.0", original: "1.0.0"),
-                     hash: .init(sha1: Data(), opaqueValue: Data()),
-                     date: .init(receiptCreation: Date(), expiration: nil),
-                     inAppPurchaseReceipts: [iap]
+        return .init(
+            bundleID: .init(name: "fake.bundle.id", data: nil),
+            appVersion: .init(current: "2.3.5", original: "1.8.4"),
+            hash: nil,
+            date: nil,
+            inAppPurchaseReceipts: [iap]
         )
         
     }

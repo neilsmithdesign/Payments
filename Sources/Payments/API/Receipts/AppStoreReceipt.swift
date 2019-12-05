@@ -14,7 +14,19 @@ public struct AppStoreReceipt: Hashable, Decodable {
     public let date: Dates?
     public let inAppPurchaseReceipts: [InAppPurchaseReceipt]
     
-    public init(from decoder: Decoder) throws {
+    public init(bundleID: BundleID, appVersion: AppVersion, hash: Hash?, date: Dates?, inAppPurchaseReceipts: [InAppPurchaseReceipt]) {
+        self.bundleID = bundleID
+        self.appVersion = appVersion
+        self.hash = hash
+        self.date = date
+        self.inAppPurchaseReceipts = inAppPurchaseReceipts
+    }
+    
+}
+
+public extension AppStoreReceipt {
+    
+    init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: JSONKeys.self)
         let bundleID = try container.decode(String.self, forKey: .bundleID)
         let appVersionNumber = try container.decode(String.self, forKey: .appVersion)

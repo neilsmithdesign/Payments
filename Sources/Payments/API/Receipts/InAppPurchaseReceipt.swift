@@ -15,6 +15,14 @@ public struct InAppPurchaseReceipt: Hashable, Decodable {
     public let originalPurchaseDate: Date
     public let subscription: Subscription?
     
+    public init(quantity: Int, id: IDs, purchaseDate: Date, originalPurchaseDate: Date, subscription: Subscription?) {
+        self.quantity = quantity
+        self.id = id
+        self.purchaseDate = purchaseDate
+        self.originalPurchaseDate = originalPurchaseDate
+        self.subscription = subscription
+    }
+    
 }
 
 
