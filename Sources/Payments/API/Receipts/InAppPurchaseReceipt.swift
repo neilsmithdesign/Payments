@@ -212,7 +212,7 @@ public extension InAppPurchaseReceipt {
 
 
 // MARK: - Decodable helpers
-extension InAppPurchaseReceipt.IDs {
+public extension InAppPurchaseReceipt.IDs {
     
     init?(product: ProductIdentifier?,
           transaction: TransactionIdentifier?,
@@ -231,7 +231,7 @@ extension InAppPurchaseReceipt.IDs {
     
 }
 
-extension InAppPurchaseReceipt.Subscription {
+public extension InAppPurchaseReceipt.Subscription {
     
     init?(expiration: Expiration?, periodKind: PeriodKind?, cancellation: Cancellation?, autoRenewStatus: AutoRenewStatus?, autoRenewPreference: ProductIdentifier?, priceIncreaseConsent: PriceConsent?) {
         guard let e = expiration, let pk = periodKind, let ars = autoRenewStatus, let arp = autoRenewPreference else { return nil }
@@ -245,7 +245,7 @@ extension InAppPurchaseReceipt.Subscription {
     
 }
 
-extension InAppPurchaseReceipt.Subscription.Expiration {
+public extension InAppPurchaseReceipt.Subscription.Expiration {
     
     init?(expirationDateRFC3339 dateString: String?, intentValue: Int?, isAttemptingRenew: Bool?) {
         guard let string = dateString, let iv = intentValue, let intent = Intent(rawValue: iv), let iar = isAttemptingRenew else { return nil }
@@ -257,7 +257,7 @@ extension InAppPurchaseReceipt.Subscription.Expiration {
     
 }
 
-extension InAppPurchaseReceipt.Subscription.PeriodKind {
+public extension InAppPurchaseReceipt.Subscription.PeriodKind {
     
     init?(isFreeTrial: Bool?, isIntroductoryPrice: Bool?) {
         guard let free = isFreeTrial, let intro = isIntroductoryPrice else { return nil }
@@ -272,7 +272,7 @@ extension InAppPurchaseReceipt.Subscription.PeriodKind {
     
 }
 
-extension InAppPurchaseReceipt.Subscription.Cancellation {
+public extension InAppPurchaseReceipt.Subscription.Cancellation {
     
     init?(cancellationDateRFC3339 dateString: String?, cancellationReason: Int?) {
         guard let string = dateString, let date = try? Date.from(RFC3339: string), let cr = cancellationReason, let reason = Reason(rawValue: cr) else { return nil }
@@ -284,7 +284,7 @@ extension InAppPurchaseReceipt.Subscription.Cancellation {
 
 
 // MARK: - Decoding keys
-extension InAppPurchaseReceipt {
+public extension InAppPurchaseReceipt {
 
     private typealias JSONKeys = Keys
     
@@ -309,7 +309,7 @@ extension InAppPurchaseReceipt {
         case subscriptionAutoRenewPreference = "auto_renew_product_id"
         case priceConsent = "price_consent_status"
         
-        init?(asn1Field number: Int) {
+        public init?(asn1Field number: Int) {
             for n in Keys.allCases {
                 guard n.asn1FieldTypeNumber == number else { continue }
                 self = n
@@ -317,7 +317,7 @@ extension InAppPurchaseReceipt {
             return nil
         }
         
-        var asn1FieldTypeNumber: Int? {
+        public var asn1FieldTypeNumber: Int? {
             switch self {
             case .quantity: return 1701
             case .productIdentifier: return 1702
