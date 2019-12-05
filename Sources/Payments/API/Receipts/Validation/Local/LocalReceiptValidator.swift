@@ -64,8 +64,8 @@ func parsedInAppPurchaseReceipt(currentPayloadLocation: inout PayloadLocation?, 
     var originalTransactionId: String?
     var purchaseDate: Date?
     var originalPurchaseDate: Date?
-    var subscriptionExpirationDate: Date?
-    var cancellationDate: Date?
+//    var subscriptionExpirationDate: Date?
+//    var cancellationDate: Date?
     var webOrderLineItemId: Int?
     
     let endOfPayload = currentPayloadLocation!.advanced(by: payloadLength)
@@ -110,7 +110,7 @@ func parsedInAppPurchaseReceipt(currentPayloadLocation: inout PayloadLocation?, 
             return .failure(.malformed(.inAppPurchaseReceipt))
         }
         
-        guard let attribute = InAppPurchaseReceipt.AttributeType(rawValue: attributeTypeValue) else {
+        guard let attribute = InAppPurchaseReceipt.Keys.init(asn1Field: attributeTypeValue) else {
             return .failure(.malformed(.inAppPurchaseReceipt))
         }
         
@@ -134,15 +134,17 @@ func parsedInAppPurchaseReceipt(currentPayloadLocation: inout PayloadLocation?, 
         case .originalPurchaseDate:
             var startOfOriginalPurchaseDate = currentPayloadLocation
             originalPurchaseDate = ASN1.decode(dateFrom: &startOfOriginalPurchaseDate, length: length)
-        case .subscriptionExpirationDate:
-            var startOfSubscriptionExpirationDate = currentPayloadLocation
-            subscriptionExpirationDate = ASN1.decode(dateFrom: &startOfSubscriptionExpirationDate, length: length)
-        case .cancellationDate:
-            var startOfCancellationDate = currentPayloadLocation
-            cancellationDate = ASN1.decode(dateFrom: &startOfCancellationDate, length: length)
+//        case .subscriptionExpirationDate:
+//            var startOfSubscriptionExpirationDate = currentPayloadLocation
+//            subscriptionExpirationDate = ASN1.decode(dateFrom: &startOfSubscriptionExpirationDate, length: length)
+//        case .cancellationDate:
+//            var startOfCancellationDate = currentPayloadLocation
+//            cancellationDate = ASN1.decode(dateFrom: &startOfCancellationDate, length: length)
         case .webOrderLineItem:
             var startOfWebOrderLineItemId = currentPayloadLocation
             webOrderLineItemId = ASN1.decode(integerFrom: &startOfWebOrderLineItemId, length: length)
+        default:
+            break
         }
         
         currentPayloadLocation = currentPayloadLocation!.advanced(by: length)
@@ -150,13 +152,27 @@ func parsedInAppPurchaseReceipt(currentPayloadLocation: inout PayloadLocation?, 
     
     guard
         let q = quantity,
-        let ids = InAppPurchaseReceipt.IDs(product: productId, transaction: transactionId, originalTransaction: originalTransactionId, webOrderLineItem: webOrderLineItemId),
-        let dates = InAppPurchaseReceipt.Dates(purchase: purchaseDate, originalPurchase: originalPurchaseDate, subscriptionExpiration: subscriptionExpirationDate, cancellation: cancellationDate)
+        let ids = InAppPurchaseReceipt.IDs(
+            product: productId,
+            transaction: transactionId,
+            originalTransaction: originalTransactionId,
+            webOrderLineItem: webOrderLineItemId,
+            appItem: nil,
+            externalVersion: nil
+        ),
+        let pd = purchaseDate,
+        let opd = originalPurchaseDate
         else {
             return .failure(.malformed(.inAppPurchaseReceipt))
     }
     
-    let receipt = InAppPurchaseReceipt(quantity: q, id: ids, date: dates)
+    let receipt = InAppPurchaseReceipt(
+        quantity: q,
+        id: ids,
+        purchaseDate: pd,
+        originalPurchaseDate: opd,
+        subscription: nil
+    )
     
     return .success(receipt)
     
