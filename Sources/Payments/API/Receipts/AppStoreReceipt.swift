@@ -47,7 +47,7 @@ public extension AppStoreReceipt {
     
     struct BundleID: Hashable {
         public let name: String
-        public let data: Data?
+        public let data: NSData?
     }
     
     struct AppVersion: Hashable {
@@ -56,8 +56,8 @@ public extension AppStoreReceipt {
     }
     
     struct Hash: Hashable {
-        public let sha1: Data
-        public let opaqueValue: Data
+        public let sha1: NSData
+        public let opaqueValue: NSData
     }
     
     struct Dates: Hashable {
