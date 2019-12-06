@@ -48,30 +48,50 @@ public extension AppStoreReceipt {
     struct BundleID: Hashable {
         public let name: String
         public let data: NSData?
+        public init(name: String, data: NSData?) {
+            self.name = name
+            self.data = data
+        }
     }
     
     struct AppVersion: Hashable {
         public let current: String
         public let original: String
+        public init(current: String, original: String) {
+            self.current = current
+            self.original = original
+        }
     }
     
     struct Hash: Hashable {
         public let sha1: NSData
         public let opaqueValue: NSData
+        public init(sha1: NSData, opaqueValue: NSData) {
+            self.sha1 = sha1
+            self.opaqueValue = opaqueValue
+        }
     }
     
     struct Dates: Hashable {
         public let receiptCreation: Date
         public let expiration: Date?
-        
-        init?(creation: String, expiration: String?) {
-            guard let c = try? Date.from(RFC3339: creation) else { return nil }
-            self.receiptCreation = c
-            if let exp = expiration, let e = try? Date.from(RFC3339: exp) {
-                self.expiration = e
-            } else {
-                self.expiration = nil
-            }
+        public init(receiptCreation: Date, expiration: Date?) {
+            self.receiptCreation = receiptCreation
+            self.expiration = expiration
+        }
+    }
+    
+}
+
+extension AppStoreReceipt.Dates {
+    
+    init?(creation: String, expiration: String?) {
+        guard let c = try? Date.from(RFC3339: creation) else { return nil }
+        self.receiptCreation = c
+        if let exp = expiration, let e = try? Date.from(RFC3339: exp) {
+            self.expiration = e
+        } else {
+            self.expiration = nil
         }
     }
     
