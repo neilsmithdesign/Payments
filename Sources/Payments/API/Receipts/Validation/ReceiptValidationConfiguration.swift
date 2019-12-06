@@ -19,13 +19,13 @@ public struct ReceiptValidationConfiguration {
     
     var validator: ReceiptValidating {
         switch validationKind {
-        case .local(let input): return ReceiptValidator(.local(LocalReceiptValidator(input)))
+        case .local(let localValidator): return ReceiptValidator(.local(localValidator))
         case .remote(let url): return ReceiptValidator(.remote(RemoteReceiptValidator(url: url)))
         }
     }
     
     public enum ValidationKind {
-        case local(LocalReceiptValidationInput)
+        case local(ReceiptValidatingLocally)
         case remote(URL)
     }
 }
