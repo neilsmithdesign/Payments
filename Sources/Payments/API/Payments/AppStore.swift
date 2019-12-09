@@ -195,14 +195,14 @@ extension AppStore {
     
     private func didCompletePurchase(for productIdentifier: ProductIdentifier) {
         onMainThread {
-            self.observer?.didCompletePurchase(self)
+            self.observer?.payments(self, didCompletePurchaseForProductWith: productIdentifier)
             PaymentEvent.Payment.Complete.notify(with: productIdentifier)
         }
     }
     
     private func didRestorePurchases(for productIdentifier: ProductIdentifier) {
         onMainThread {
-            self.observer?.didRestorePurchases(self)
+            self.observer?.payments(self, didRestorePurchaseForProductWith: productIdentifier)
             PaymentEvent.Payment.Restored.notify(with: productIdentifier)
         }
     }

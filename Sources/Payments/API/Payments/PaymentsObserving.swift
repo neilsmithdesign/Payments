@@ -12,7 +12,7 @@ public protocol PaymentsObserving: AnyObject {
     func payments(_ payments: PaymentsProcessing, didLoad products: Set<Product>)
     func payments(_ payments: PaymentsProcessing, didFailWith error: PaymentsError)
     func payments(_ payments: PaymentsProcessing, paymentWasDeferred alert: PaymentDeferredAlert)
-    func didRestorePurchases(_ payments: PaymentsProcessing)
-    func didCompletePurchase(_ payments: PaymentsProcessing)
+    func payments(_ payments: PaymentsProcessing, didRestorePurchaseForProductWith identifier: ProductIdentifier)
+    func payments(_ payments: PaymentsProcessing, didCompletePurchaseForProductWith identifier: ProductIdentifier)
     func userCannotMake(payments: PaymentsProcessing)
 }
