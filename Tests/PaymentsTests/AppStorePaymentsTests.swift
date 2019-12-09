@@ -22,7 +22,7 @@ final class AppStorePaymentsTests: XCTestCase {
             receiptLoader: ReceiptLoaderMock(),
             productIdentifiers: []
         )
-        let payments = AppStorePayments(configuration: config)
+        let payments = AppStore(configuration: config)
         payments.observer = observer
 
         XCTAssertFalse(observer.isReceiptValidated)
@@ -44,7 +44,7 @@ final class AppStorePaymentsTests: XCTestCase {
             productIdentifiers: identifiers
         )
         let request = FakeProductsRequest(productIdentifiers: identifiers)
-        let payments = AppStorePayments(
+        let payments = AppStore(
             configuration: config,
             productsRequest: request
         )

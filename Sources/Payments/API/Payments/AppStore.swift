@@ -1,5 +1,5 @@
 //
-//  AppStorePayments.swift
+//  AppStore.swift
 //  
 //
 //  Created by Neil Smith on 30/11/2019.
@@ -7,7 +7,7 @@
 
 import StoreKit
 
-public final class AppStorePayments: NSObject, PaymentsProcessing {
+public final class AppStore: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
@@ -62,7 +62,7 @@ public final class AppStorePayments: NSObject, PaymentsProcessing {
 
 
 // MARK: - Receipt Verification
-extension AppStorePayments {
+extension AppStore {
     
     public func verifyPurchases() {
         guard let loader = receiptLoader else {
@@ -101,7 +101,7 @@ extension AppStorePayments {
 
 
 // MARK: - Notifications
-extension AppStorePayments {
+extension AppStore {
     
     public func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
         NotificationCenter.default.addObserver(
@@ -120,7 +120,7 @@ extension AppStorePayments {
 
 
 // MARK: - Load products
-public extension AppStorePayments {
+public extension AppStore {
     
     func loadProducts() {
         storeController.loadProducts { [weak self] result in
@@ -138,7 +138,7 @@ public extension AppStorePayments {
 
 
 // MARK: - Purchases
-extension AppStorePayments {
+extension AppStore {
 
     public func purchase(_ product: Product) {
         storeController.purchase(product) { [weak self] result in
@@ -169,7 +169,7 @@ extension AppStorePayments {
 
 
 // MARK: - Observer calls
-extension AppStorePayments {
+extension AppStore {
     
     private func didLoad(_ products: Set<Product>) {
         onMainThread {
