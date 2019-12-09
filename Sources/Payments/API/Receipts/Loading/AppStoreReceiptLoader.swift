@@ -20,7 +20,13 @@ final class AppStoreReceiptLoader: NSObject, ReceiptLoading {
     func load(using fileInspector: FileInspector = FileManager.default, completion: @escaping (ReceiptLoadingResult) -> Void) {
         if let url = location.appStoreReceiptURL {
             guard fileInspector.fileExists(atPath: url.path) else {
-                completion(.failure(.unreachableAtURL))
+                if refreshAttempts < 1 {
+                    self.completionHandler = completion
+                    refreshRequest.start()
+                    refreshAttempts += 1
+                } else {
+                    completion(.failure(.unreachableAtURL))                    
+                }
                 return
             }
             do {
@@ -39,6 +45,7 @@ final class AppStoreReceiptLoader: NSObject, ReceiptLoading {
     }
     
     
+    
     // MARK: Private
     private let location: ReceiptLocation
     
@@ -51,7 +58,7 @@ final class AppStoreReceiptLoader: NSObject, ReceiptLoading {
     }()
     
     private var refreshAttempts: Int
-    
+
 }
 
 extension AppStoreReceiptLoader: SKRequestDelegate {
