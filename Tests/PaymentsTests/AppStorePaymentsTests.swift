@@ -28,7 +28,7 @@ final class AppStorePaymentsTests: XCTestCase {
         XCTAssertFalse(observer.isReceiptValidated)
         
         // When
-        payments.verifyPurchases()
+        payments.validateReceipt()
         
         // Then
         XCTAssertTrue(observer.isReceiptValidated)
@@ -59,3 +59,17 @@ final class AppStorePaymentsTests: XCTestCase {
     
 }
 
+
+private extension AppStore {
+    
+    convenience init(configuration: AppStoreConfiguration, productsRequest: ProductsRequest) {
+        let controller = AppStoreController(
+            productIdentifiers: configuration.productIdentifiers,
+            transactionObserver: configuration.transactionObserver,
+            productsRequest: productsRequest,
+            simulatesAskToBuy: configuration.simulateAskToBuy
+        )
+        self.init(controller: controller, configuration: configuration)
+    }
+    
+}

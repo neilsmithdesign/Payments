@@ -8,6 +8,8 @@
 import Foundation
 import StoreKit
 
+/// Container type for various payment events. Nested types use
+/// NotificationCenter to broadcast to their observers.
 public enum PaymentEvent {
     
     static func notify(for transaction: SKPaymentTransaction) {

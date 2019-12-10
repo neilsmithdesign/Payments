@@ -7,11 +7,17 @@
 
 import StoreKit
 
+/**
+ A representation of an in-app purchase.
+ Contains the underlying StoreKit product.
+ */
 public final class AppStoreProduct: Product {
     
-    public var storeKitProduct: SKProduct
+    /// The associated SKProduct
+    public private (set) var storeKitProduct: SKProduct
     
-    var storeKitPayment: SKMutablePayment {
+    /// Convenience method for initiating a payment for this product
+    func preparedStoreKitPayment() -> SKMutablePayment {
         return SKMutablePayment(product: storeKitProduct)
     }
     
@@ -48,15 +54,6 @@ public final class AppStoreProduct: Product {
             numericalPrice: price,
             identifier: identifier
         )
-    }
-    
-}
-
-
-public extension AppStoreProduct {
-    
-    static func createMock(title: String, description: String, price: Decimal, identifier: String) -> AppStoreProduct {
-        return .init(title: title, description: description, price: NSDecimalNumber(decimal: price), identifier: identifier)
     }
     
 }

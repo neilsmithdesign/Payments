@@ -12,7 +12,7 @@ public struct ReceiptValidationConfiguration {
     let loader: ReceiptLoading?
     let validationKind: ValidationKind
     
-    public init(loader: ReceiptLoading? = nil, validationKind: ValidationKind) {
+    init(loader: ReceiptLoading? = nil, validationKind: ValidationKind) {
         self.loader = loader
         self.validationKind = validationKind
     }

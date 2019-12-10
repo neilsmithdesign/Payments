@@ -28,6 +28,7 @@ final class AppStoreController: NSObject, StoreControlling, SKProductsRequestDel
         } else {
             paymentQueue.add(self)
         }
+        
     }
     
     var productIdentifiers: Set<ProductIdentifier>
@@ -105,7 +106,7 @@ extension AppStoreController: SKPaymentTransactionObserver {
             return
         }
         if canMakePayments {
-            let payment = appStoreProduct.storeKitPayment
+            let payment = appStoreProduct.preparedStoreKitPayment()
             payment.simulatesAskToBuyInSandbox = simulatesAskToBuy
             self.paymentRequest = completion
             paymentQueue.add(payment)

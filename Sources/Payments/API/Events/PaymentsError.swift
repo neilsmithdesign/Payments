@@ -9,10 +9,22 @@ import StoreKit
 
 public enum PaymentsError: Error {
     
+    /// Errors provided during the receipt validation process
     case receiptError(ReceiptError)
+    
+    /// If request to load products failed. Typically this is due
+    /// to a mismatch between supplied product identifiers and
+    /// those which have been configured in App Store Connect.
     case productLoadRequestFailed(message: String)
+    
+    /// When an in-app purchase fails and the supplied SKError
     case paymentFailed(SKError)
+    
+    /// If an attempt connnect to the App Store was made but the
+    /// user is not connected to the network
     case networkUnavailable
+    
+    /// An unknown error
     case unknownError(Error?)
     
     init(_ error: Error?) {

@@ -7,6 +7,8 @@
 
 import Foundation
 
+/// A convenience type for name-spacing the Notification
+/// names for payment events.
 public enum PaymentEventKind {
     case loadProductsSucceeded
     case loadProductsFailed

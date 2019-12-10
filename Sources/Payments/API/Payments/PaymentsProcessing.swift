@@ -22,7 +22,7 @@ public protocol PaymentsProcessing {
     /// Verify the user's existing purchases if they exist. When interacting with the App Store
     /// on iOS, this method retrieves the encrypted App Store receipt from the user's device
     /// and validates it using the supplied receipt validator
-    func verifyPurchases()
+    func validateReceipt()
     
     func loadProducts()
 

@@ -7,6 +7,7 @@
 
 import Foundation
 
+/// The decoded in app purchase receipt
 public struct InAppPurchaseReceipt: Hashable, Decodable {
     
     public let quantity: Int

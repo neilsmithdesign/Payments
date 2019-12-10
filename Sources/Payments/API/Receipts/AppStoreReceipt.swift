@@ -7,7 +7,9 @@
 
 import Foundation
 
+/// The decoded App Store receipt.
 public struct AppStoreReceipt: Hashable, Decodable {
+    
     public let bundleID: BundleID
     public let appVersion: AppVersion
     public let hash: Hash?

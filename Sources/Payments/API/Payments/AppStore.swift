@@ -7,38 +7,47 @@
 
 import StoreKit
 
+/// The AppStore is the main public interface for StoreKit related interactions
+/// Validate the receipt, load in-app purchase products and make or restore purchases.
 public final class AppStore: NSObject, PaymentsProcessing {
     
     
     // MARK: Interface
-    public convenience init(configuration: AppStoreConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil, productsRequest: ProductsRequest? = nil) {
+    
+    /**
+     Use your AppStoreConfiguration to initialize an AppStore instance.
+     */
+    public convenience init(configuration: AppStoreConfiguration) {
         let controller = AppStoreController(
             productIdentifiers: configuration.productIdentifiers,
-            transactionObserver: transactionObserver,
-            productsRequest: productsRequest,
+            transactionObserver: configuration.transactionObserver,
             simulatesAskToBuy: configuration.simulateAskToBuy
         )
         self.init(
             controller: controller,
-            configuration: configuration,
-            transactionObserver: transactionObserver,
-            productsRequest: productsRequest
+            configuration: configuration
         )
     }
     
-    init(controller: AppStoreController, configuration: AppStoreConfiguration, transactionObserver: SKPaymentTransactionObserver? = nil, productsRequest: ProductsRequest? = nil) {
+    init(controller: AppStoreController, configuration: AppStoreConfiguration) {
         self.configuration = configuration
         self.receiptValidator = configuration.receiptValidator
         self.receiptLoader = configuration.receiptLoader
         self.storeController = controller
     }
     
+    /// Assign an observer to be notified of receipt validation
+    /// and App Store transaction events. All calls via the observer
+    /// are dispatched on the main thread.
     public weak var observer: PaymentsObserving?
 
     
     // MARK: Read only
+    
+    /// When loaded, the available products a user can purchase in your app.
     public private (set) var availableProducts: Set<Product> = []
 
+    /// Determines whether a user is authorized to make payments.
     public var canMakePayments: Bool {
         return storeController.canMakePayments
     }
@@ -64,7 +73,14 @@ public final class AppStore: NSObject, PaymentsProcessing {
 // MARK: - Receipt Verification
 extension AppStore {
     
-    public func verifyPurchases() {
+    
+    /// Uses the supplied 'loader' and 'validator' to perform
+    /// receipt validation. As receipt validation can be either
+    /// local or remote, this method is asynchronous. If successful,
+    /// the result is posted via the observer method:
+    /// func payments(_ payments: PaymentsProcessing, didValidate receipt: AppStoreReceipt)
+    /// Otherwise the error method is called
+    public func validateReceipt() {
         guard let loader = receiptLoader else {
             return
         }
@@ -103,6 +119,7 @@ extension AppStore {
 // MARK: - Notifications
 extension AppStore {
     
+    /// Convenience method for observing a payment event
     public func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
         NotificationCenter.default.addObserver(
             observer,
@@ -112,6 +129,7 @@ extension AppStore {
         )
     }
     
+    /// Convenience method for removing an observer of a payment event
     public func remove(observer: Any, forPaymentEvent kind: PaymentEventKind) {
         NotificationCenter.default.removeObserver(observer, name: kind.notification, object: nil)
     }
@@ -120,9 +138,10 @@ extension AppStore {
 
 
 // MARK: - Load products
-public extension AppStore {
-    
-    func loadProducts() {
+extension AppStore {
+        
+    /// Loads the available products as configured in App Store Connect
+    public func loadProducts() {
         storeController.loadProducts { [weak self] result in
             switch result {
             case .success(let products):
@@ -140,12 +159,20 @@ public extension AppStore {
 // MARK: - Purchases
 extension AppStore {
 
+    
+    /// Initiates the payment flow for purchasing the supplied product
+    /// The result is posted to the observer, and via the notification:
+    /// 'PaymentEvent.Payment.Complete' if successful
+    /// 'PaymentEvent.Payment.Restored' if purchase is a restoration
+    /// 'PaymentEvent.Payment.Deferred' if purchase requries approval from someone (such as a parent)
+    /// 'PaymentEvent.Payment.Failed' if there was an error whilst trying to process the payment
     public func purchase(_ product: Product) {
         storeController.purchase(product) { [weak self] result in
             self?.handle(payment: result)
         }
     }
     
+    /// Initiates the purchase restoration process
     public func restorePreviousPurchases() {
         storeController.restorePurchases { [weak self] result in
             self?.handle(payment: result)
@@ -224,22 +251,6 @@ extension AppStore {
     
     private func onMainThread(_ closure: @escaping () -> Void) {
         DispatchQueue.main.async { closure() }
-    }
-    
-}
-
-public struct PaymentDeferredAlert {
-    
-    public let title: String
-    public let message: String
-    public let productIdentifier: String
-    
-    static func standardMessage(productIdentifier: String) -> PaymentDeferredAlert {
-        return .init(
-            title: "Waiting For Approval",
-            message: "Thank you! You can continue to use the app whilst your purchase is pending approval from your family organizer.",
-            productIdentifier: productIdentifier
-        )
     }
     
 }

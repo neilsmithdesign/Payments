@@ -7,15 +7,15 @@
 
 import Foundation
 
-public struct ReceiptValidator: ReceiptValidating {
+struct ReceiptValidator: ReceiptValidating {
     
-    public init(_ validatorKind: ReceiptValidatorKind) {
+    init(_ validatorKind: ReceiptValidatorKind) {
         self.validatorKind = validatorKind
     }
     
     private let validatorKind: ReceiptValidatorKind
 
-    public func validate(receipt data: Data, completion: @escaping (ReceiptValidationResult) -> Void) {
+    func validate(receipt data: Data, completion: @escaping (ReceiptValidationResult) -> Void) {
         switch validatorKind {
         case .local(let validator): completion(validator.validate(receipt: data))
         case .remote(let validator): validator.validate(receipt: data, completion: completion)

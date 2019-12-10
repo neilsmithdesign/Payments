@@ -7,8 +7,21 @@
 
 import StoreKit
 
+/// Use this type to configure an instance of AppStore.
 public struct AppStoreConfiguration {
     
+    /**
+     Configuration for initializing an AppStore instance.
+     - Parameters:
+        - environment: Declare whether this is a production or development environment.
+                    In development, this allows you to simulate ask to buy during testing.
+        - receiptConfiguration: Determines how you intend to validate the App Store receipt.
+                    Either locally on device, or remotely on your server.
+        - productIdentifiers: Your product identifiers as configured in App Store Connect
+        - transactionObserver: You can optionally set your own transaction observer to handle
+                    call backs from StoreKit yourself. Alternatively, if you pass nil, your
+                    instance of AppStore handle SKPaymentTransactionObserver methods.
+    */
     public init(environment: Environment,
                 receiptConfiguration: ReceiptValidationConfiguration,
                 fileInspector: FileInspector = FileManager.default,
@@ -25,7 +38,7 @@ public struct AppStoreConfiguration {
     }
 
     /// Private initializer utilized to provide mocking ability
-    public init(environment: Environment,
+    init(environment: Environment,
                 receiptValidator: ReceiptValidating? = nil,
                 receiptLoader: ReceiptLoading? = nil,
                 fileInspector: FileInspector = FileManager.default,
@@ -48,6 +61,7 @@ public struct AppStoreConfiguration {
     public var productIdentifiers: Set<ProductIdentifier>
     
     
+    /// In a sandox/development environment, simulates the ask to buy purchase 
     public var simulateAskToBuy: Bool {
         switch environment {
         case .production: return false
