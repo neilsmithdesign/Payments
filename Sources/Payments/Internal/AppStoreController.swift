@@ -93,7 +93,9 @@ extension AppStoreController {
 
 // MARK: - Purchases
 extension AppStoreController: SKPaymentTransactionObserver {
+   
     
+    // Make purchase
     func purchase(_ product: Product, completion: @escaping (PaymentResult) -> Void) {
         guard let appStoreProduct = product as? AppStoreProduct else {
             preconditionFailure("Non-App Store product requested for purcahse. Programmer error.")
@@ -105,13 +107,15 @@ extension AppStoreController: SKPaymentTransactionObserver {
         if canMakePayments {
             let payment = appStoreProduct.storeKitPayment
             payment.simulatesAskToBuyInSandbox = simulatesAskToBuy
-            paymentQueue.add(payment)
             self.paymentRequest = completion
+            paymentQueue.add(payment)
         } else {
             completion(.failure(PaymentsError.paymentFailed(SKError(.paymentNotAllowed))))
         }
     }
     
+    
+    // Restores any existing purchases
     func restorePurchases(_ completion: @escaping (PaymentResult) -> Void) {
         self.paymentRequest = completion
         paymentQueue.restoreCompletedTransactions()
@@ -119,38 +123,30 @@ extension AppStoreController: SKPaymentTransactionObserver {
     
     func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
-            let id = transaction.payment.productIdentifier
+            notify(for: transaction)
             switch transaction.transactionState {
-            
-            case .purchasing:
-                break
-            
-            case .deferred:
-                paymentRequest?(.deferred(id))
-            
-            case .purchased:
-                SKPaymentQueue.default().finishTransaction(transaction)
-                paymentRequest?(.success(id))
-                
-            case .failed:
-                SKPaymentQueue.default().finishTransaction(transaction)
-                handle(paymentRequest: transaction.error)
-                
-            case .restored:
-                SKPaymentQueue.default().finishTransaction(transaction)
-                paymentRequest?(.restored(id))
-                
-            @unknown default: fatalError()
+            case .purchased, .failed, .restored: SKPaymentQueue.default().finishTransaction(transaction)
+            default: break
             }
         }
-        paymentRequest = nil
     }
     
-    public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
+    private func notify(for transaction: SKPaymentTransaction) {
+        PaymentEvent.notify(for: transaction)
+        let id = transaction.payment.productIdentifier
+        switch transaction.transactionState {
+        case .failed: handle(paymentRequest: transaction.error)
+        case .deferred: paymentRequest?(.deferred(id))
+        case .purchased: paymentRequest?(.success(id))
+        case .restored: paymentRequest?(.restored(id))
+        case .purchasing: break
+        @unknown default: fatalError()
+        }
+    }
+    
+    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
         handle(paymentRequest: error)
-        paymentRequest = nil
-    }
-    
+    }    
 
     private func handle(paymentRequest error: Error?) {
         guard let error = error as? SKError, error.code != .paymentCancelled else { return }

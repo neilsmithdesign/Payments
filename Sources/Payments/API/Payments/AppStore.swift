@@ -208,7 +208,7 @@ extension AppStore {
     }
     
     private func paymentWasDeferred(for productIdentifier: ProductIdentifier) {
-        let alert = PaymentDeferredAlert.standardMessage(for: productIdentifier)
+        let alert = PaymentDeferredAlert.standardMessage(productIdentifier: productIdentifier)
         onMainThread {
             self.observer?.payments(self, paymentWasDeferred: alert)
             PaymentEvent.Payment.Deferred.notify(with: alert)
@@ -234,7 +234,7 @@ public struct PaymentDeferredAlert {
     public let message: String
     public let productIdentifier: String
     
-    static func standardMessage(for productIdentifier: String) -> PaymentDeferredAlert {
+    static func standardMessage(productIdentifier: String) -> PaymentDeferredAlert {
         return .init(
             title: "Waiting For Approval",
             message: "Thank you! You can continue to use the app whilst your purchase is pending approval from your family organizer.",

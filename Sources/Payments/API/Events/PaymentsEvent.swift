@@ -9,9 +9,25 @@ import Foundation
 import StoreKit
 
 public enum PaymentEvent {
+    
+    static func notify(for transaction: SKPaymentTransaction) {
+        let id = transaction.payment.productIdentifier
+        switch transaction.transactionState {
+        case .failed: Payment.Failed.notify(with: PaymentsError(transaction.error))
+        case .deferred: Payment.Deferred.notify(with: .standardMessage(productIdentifier: id))
+        case .purchased: Payment.Complete.notify(with: id)
+        case .restored: Payment.Restored.notify(with: id)
+        case .purchasing: break
+        @unknown default: fatalError()
+        }
+    }
+    
+}
+
+public extension PaymentEvent {
         
     // MARK: - Load products
-    public enum LoadProducts {
+    enum LoadProducts {
         
         public struct Succeeded: PaymentsNotifying {
             
