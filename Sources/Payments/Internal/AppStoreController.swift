@@ -131,6 +131,21 @@ extension AppStoreController: SKPaymentTransactionObserver {
         }
     }
     
+    func paymentQueue(_ queue: SKPaymentQueue, shouldAddStorePayment payment: SKPayment, for product: SKProduct) -> Bool {
+        return true
+    }
+    
+    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
+        handle(paymentRequest: error)
+    }
+
+
+}
+
+
+// MARK: - Helpers
+extension AppStoreController {
+
     private func notify(for transaction: SKPaymentTransaction) {
         PaymentEvent.notify(for: transaction)
         let id = transaction.payment.productIdentifier
@@ -143,10 +158,6 @@ extension AppStoreController: SKPaymentTransactionObserver {
         @unknown default: fatalError()
         }
     }
-    
-    func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
-        handle(paymentRequest: error)
-    }    
 
     private func handle(paymentRequest error: Error?) {
         guard let error = error as? SKError, error.code != .paymentCancelled else { return }
