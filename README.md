@@ -8,6 +8,7 @@ Although I use this code in my personal projects, it is not intended to be used 
 ## Installation
 
 Install as a dependency with the Swift Package Manager using the URL: `https://github.com/neilsmithdesign/Payments.git`
+Be sure to use from version `0.3.0` onwards.
 In Xcode 11, you can do so by going to `File` > `Swift Packages` > `Add Package Dependency...`
 
 
