@@ -120,7 +120,7 @@ extension AppStore {
 extension AppStore {
     
     /// Convenience method for observing a payment event
-    public func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
+    public static func add(observer: Any, forPaymentEvent kind: PaymentEventKind, selector: Selector) {
         NotificationCenter.default.addObserver(
             observer,
             selector: selector,
@@ -130,7 +130,7 @@ extension AppStore {
     }
     
     /// Convenience method for removing an observer of a payment event
-    public func remove(observer: Any, forPaymentEvent kind: PaymentEventKind) {
+    public static func remove(observer: Any, forPaymentEvent kind: PaymentEventKind) {
         NotificationCenter.default.removeObserver(observer, name: kind.notification, object: nil)
     }
     
