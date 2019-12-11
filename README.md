@@ -16,7 +16,7 @@ In Xcode 11, you can do so by going to `File` > `Swift Packages` > `Add Package 
 
 ### Configure for your app
 
-```
+```swift
 
 // 1: Declare the url on your server for remote receipt validation
 let url = URL(string: "https://...")
@@ -37,7 +37,7 @@ let appStore = AppStore(configuration: config)
 
 You can get notified of updates from StoreKit two different ways. Firstly, with an observer (via the delegate pattern). 
 
-```
+```swift
 
 class MyObservingClass: PaymentsObserving {
 
@@ -72,7 +72,7 @@ See `PaymentsObserving.swift` for all observer protocol methods.
 
 You can also assign subscribers to individual notifications related to each of these observer methods. These are broadcast by NotificationCenter. Use the convenience API anywhere in your app
 
-```
+```swift
 
 class MyProductListModel {
 
@@ -106,7 +106,7 @@ See `PaymentsEvent.swift` and `PaymentsEventKind.swift` for all possible notific
 To perform remote receipt validation, provide a URL (on your own server) to send the encoded app receipt data to. After validating with Apple, respond with JSON which can be parsed into an instance of `AppStoreReceipt`.  See `AppStoreReceipt.swift` and `InAppPurchaseReceipt.swift` for JSON keys and decoding approach. These two types expect JSON in the same form that is supplied by Apple ([see here](https://developer.apple.com/library/archive/releasenotes/General/ValidateAppStoreReceipt/Chapters/ReceiptFields.html))
 
 
-```
+```swift
 
 // during configuration
 let config = AppStoreConfiguration(
@@ -140,7 +140,7 @@ IMPORTANT NOTE: the example implementation does not guarantee your app will be i
 
 ### Make purchases
 
-```
+```swift
 
 // initiate a payment
 appStore.purchase(selectedProduct)
