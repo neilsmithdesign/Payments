@@ -8,7 +8,7 @@ Although I use this code in my personal projects, it is not intended to be used 
 ## Installation
 
 Install as a dependency with the Swift Package Manager using the URL: `https://github.com/neilsmithdesign/Payments.git`
-Be sure to use from version `0.3.1` onwards.
+Be sure to use from version `0.3.2` onwards.
 In Xcode 11, you can do so by going to `File` > `Swift Packages` > `Add Package Dependency...`
 
 
@@ -111,7 +111,7 @@ To perform remote receipt validation, provide a URL (on your own server) to send
 // during configuration
 let config = AppStoreConfiguration(
     environment: .production,
-    receiptConfiguration: .appStore(validation: .remote(url, MyDecodableType.self), bundle: .main),
+    receiptConfiguration: .appStore(validation: .remote(url), bundle: .main),
     productIdentifiers: ["YOUR_PRODUCT_IDENTIFIERS"]
 ) 
 
